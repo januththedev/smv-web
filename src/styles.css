@@ -132,14 +132,20 @@ html.lenis body {
 }
 
 .glass-dock {
-  background: rgb(15 16 19 / 58%);
-  border: 1px solid rgb(238 234 227 / 14%);
-  backdrop-filter: blur(28px) saturate(1.45);
-  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  background: rgb(255 255 255 / 7%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  backdrop-filter: blur(30px) saturate(1.6);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 8%) inset,
     0 18px 48px rgb(0 0 0 / 38%),
     0 4px 18px rgb(0 0 0 / 16%);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-dock {
+    background: rgb(18 19 23 / 94%);
+  }
 }
 
 .glass-dock a,
