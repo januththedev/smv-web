@@ -19,6 +19,8 @@ export const site = {
   mapsEmbed:
     "https://maps.google.com/maps?q=567%2F2%2F1%20Galle%20Road%20Wadduwa%20Sri%20Lanka&t=&z=16&ie=UTF8&iwloc=&output=embed",
   facebook: "https://www.facebook.com/SarangalakmalFitness",
+  facebookEmbed:
+    "https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FSarangalakmalFitness&tabs=timeline&width=900&height=760&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false",
   instagram: "https://www.instagram.com/smv_gym_wadduwa/",
   instagramAlt: "https://www.instagram.com/smv.gym.wadduwa/",
   instagramHandle: "@smv_gym_wadduwa",
