@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Eye, History, KeyRound, LockKeyhole, Save, Server, Sparkles } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 
-export const Route = createFileRoute("/admin")({ component: AdminPage });
+export const Route = createFileRoute("/admin")({
+  component: AdminPage,
+  head: () => ({ meta: [{ title: "SMV GYM Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
+});
 
 type Content = { headline: string; intro: string; font: string; accent: string };
 type Version = Content & { id: string; label: string; createdAt: string };

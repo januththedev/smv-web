@@ -25,6 +25,11 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li className="pt-3">
+              <Link to="/admin" className="text-xs text-subtle no-underline hover:text-fg">
+                Admin
+              </Link>
+            </li>
           </ul>
         </div>
         <div className="md:col-span-4">
