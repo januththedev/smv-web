@@ -3,11 +3,11 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { defineEventHandler } from "h3";
 import * as z from "zod";
 import { createSiteVersion, listSiteVersions, readSiteContent, updateSiteContent } from "../../src/lib/site-content.server";
+import { basicAdminPassword, verifyAdminPassword } from "../utils/admin-auth";
 
-function tokenIsValid(request: Request): boolean {
-  const expected = process.env.MCP_API_TOKEN?.trim();
-  const supplied = request.headers.get("authorization");
-  return Boolean(expected && supplied === `Bearer ${expected}`);
+function requestIsAuthenticated(request: Request): boolean {
+  const password = basicAdminPassword(request);
+  return Boolean(password && verifyAdminPassword(password));
 }
 
 function mcpServer() {
@@ -44,7 +44,12 @@ function mcpServer() {
 
 export default defineEventHandler(async (event) => {
   const request = event.req as Request;
-  if (!tokenIsValid(request)) return new Response("Unauthorized", { status: 401 });
+  if (!requestIsAuthenticated(request)) {
+    return new Response("Admin password required", {
+      status: 401,
+      headers: { "www-authenticate": 'Basic realm="SMV Admin MCP", charset="UTF-8"' },
+    });
+  }
   const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
   const server = mcpServer();
   await server.connect(transport);

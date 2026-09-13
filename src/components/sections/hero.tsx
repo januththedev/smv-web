@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { Button } from "@/components/ui/button";
 import { site, waJoin } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
+  const content = useSiteContent();
 
   useEffect(() => {
     const el = root.current;
@@ -70,8 +72,7 @@ export function Hero() {
           GYM
         </h1>
         <p data-hero className="mt-6 max-w-md text-lg text-fg/80 md:text-xl">
-          {site.tagline}. Strength, physique, and beach work on the south coast — coached by{" "}
-          {site.coach}.
+          {content.headline}. {content.intro}
         </p>
         <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
