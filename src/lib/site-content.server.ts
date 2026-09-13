@@ -6,6 +6,7 @@ export type SiteContent = {
   intro: string;
   font: string;
   accent: string;
+  logoUrl: string;
 };
 
 export type SiteVersion = SiteContent & {
@@ -19,6 +20,7 @@ export const defaultSiteContent: SiteContent = {
   intro: "A friendly gym in Wadduwa for strength, fitness and bodybuilding.",
   font: "Manrope",
   accent: "#c45c32",
+  logoUrl: "/images/smv-logo.png",
 };
 
 function cleanContent(value: Partial<SiteContent>): SiteContent {
@@ -27,6 +29,7 @@ function cleanContent(value: Partial<SiteContent>): SiteContent {
     intro: value.intro?.trim() || defaultSiteContent.intro,
     font: value.font?.trim() || defaultSiteContent.font,
     accent: /^#[0-9a-f]{6}$/i.test(value.accent ?? "") ? value.accent! : defaultSiteContent.accent,
+    logoUrl: value.logoUrl?.trim() || defaultSiteContent.logoUrl,
   };
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-export type PublicSiteContent = { headline: string; intro: string; font: string; accent: string };
-const fallback: PublicSiteContent = { headline: "Train strong. Feel good.", intro: "A friendly gym in Wadduwa for strength, fitness and bodybuilding.", font: "Manrope", accent: "#c45c32" };
+export type PublicSiteContent = { headline: string; intro: string; font: string; accent: string; logoUrl: string };
+const fallback: PublicSiteContent = { headline: "Train strong. Feel good.", intro: "A friendly gym in Wadduwa for strength, fitness and bodybuilding.", font: "Manrope", accent: "#c45c32", logoUrl: "/images/smv-logo.png" };
 
 export function useSiteContent() {
   const [content, setContent] = useState(fallback);
