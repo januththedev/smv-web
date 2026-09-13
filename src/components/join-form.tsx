@@ -65,7 +65,7 @@ export function JoinForm({ compact }: Props) {
           We have your note.
         </p>
         <p className="mt-3 text-muted">
-          Finish it on WhatsApp so Saranga or the floor can answer you today.
+          Send your details on WhatsApp so we can reply today.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild>
@@ -133,10 +133,10 @@ export function JoinForm({ compact }: Props) {
         </div>
       )}
       <Button type="submit" size="lg" className="mt-2 self-start pr-5">
-        Send to the floor
+        Send on WhatsApp
       </Button>
       <p className="text-xs text-subtle">
-        We do not invent prices on a website. Membership is quoted on the floor or on WhatsApp.
+        We will explain the membership price when we reply.
       </p>
     </form>
   );

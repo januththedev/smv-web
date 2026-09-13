@@ -105,7 +105,7 @@ function Contact() {
               Write to the floor
             </h2>
             <p className="mt-3 text-muted">
-              Faster on WhatsApp. This form keeps a note on your device and sends you through to chat.
+              WhatsApp is the fastest way to contact us. Fill in the form and we will reply.
             </p>
           </div>
           <div className="md:col-span-7">

@@ -13,7 +13,7 @@ export function Footer() {
           <p className="mt-2 text-sm uppercase tracking-[0.2em] text-iron">
             Galle Road · Wadduwa
           </p>
-          <p className="mt-5 max-w-sm text-muted">{site.tagline}. On Galle Road, not in a brochure.</p>
+          <p className="mt-5 max-w-sm text-muted">{site.tagline} A friendly gym on Galle Road.</p>
         </div>
         <div className="md:col-span-3">
           <p className="text-xs uppercase tracking-[0.18em] text-subtle">Navigate</p>
