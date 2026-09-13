@@ -9,6 +9,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { Footer } from "@/components/layout/footer";
 import { MagneticNav } from "@/components/layout/magnetic-nav";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { ScrollProgress } from "@/components/motion/scroll-progress";
 import { site } from "@/lib/site";
 import appCss from "../styles.css?url";
 
@@ -78,6 +79,7 @@ function RootDocument() {
         <AuthProvider>
           <SmoothScroll>
             <div className="grain" aria-hidden="true" />
+            <ScrollProgress />
             <MagneticNav />
             <Outlet />
             <Footer />
