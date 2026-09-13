@@ -71,7 +71,7 @@ export function MagneticNav() {
       >
         <nav
           aria-label="Primary"
-          className="glass-dock flex w-full max-w-5xl items-center justify-between gap-2 rounded-full px-2 py-0.5 pl-3"
+          className="glass-dock flex w-full max-w-6xl items-center justify-between gap-2 rounded-full px-2 py-1 pl-3"
         >
           <Link
             to="/"
@@ -193,7 +193,9 @@ function MagneticLink({
       onMouseLeave={onLeave}
       className={cn(
         "inline-flex h-10 items-center rounded-full px-3.5 text-[0.8rem] tracking-wide no-underline transition-[color,background-color,transform] duration-150 ease-out will-change-transform",
-        active ? "bg-fg/8 text-fg" : "text-muted hover:text-fg",
+        active
+          ? "bg-fg/10 text-fg shadow-[0_1px_0_rgb(255_255_255_/_10%)_inset]"
+          : "text-muted hover:text-fg",
       )}
     >
       {children}
