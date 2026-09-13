@@ -21,9 +21,9 @@ function Events() {
   return (
     <main id="main">
       <PageHero
-        kicker="Events"
-        title="Events for our members."
-        lede="Championships, a cricket tournament, and beach sessions. SMV is a community that trains together and then keeps going."
+        kicker="News"
+        title="SMV in motion."
+        lede="Updates, competitions and community news from SMV GYM Wadduwa."
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
@@ -56,6 +56,15 @@ function Events() {
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-8 overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
+          <iframe
+            title="SMV GYM Facebook news"
+            src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FSarangalakmalFitness&tabs=timeline&width=900&height=760&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false"
+            className="h-[760px] w-full border-0"
+            loading="lazy"
+          />
         </div>
 
         <div className="mt-20 rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">

@@ -78,7 +78,6 @@ function RootDocument() {
         <PreviewHostBridge />
         <AuthProvider>
           <SmoothScroll>
-            <div className="grain" aria-hidden="true" />
             <ScrollProgress />
             <MagneticNav />
             <Outlet />

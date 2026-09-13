@@ -35,50 +35,32 @@ export const site = {
 
 export const nav = [
   { href: "/", label: "Home" },
-  { href: "/training", label: "Training" },
   { href: "/membership", label: "Join" },
-  { href: "/gallery", label: "Floor" },
-  { href: "/events", label: "Events" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Visit" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/events", label: "News" },
 ] as const;
 
 export const programs = [
   {
-    slug: "strength",
-    title: "Strength floor",
-    kicker: "Iron",
-    copy: "Free weights, racks, and honest work. Build the base that every other goal sits on.",
+    slug: "weight-gain",
+    title: "Weight gain",
+    kicker: "Build",
+    copy: "Structured training and practical guidance to help you add quality size and strength.",
     image: "/images/deadlift.jpg",
-    href: "/training",
-    hash: "strength",
+  },
+  {
+    slug: "weight-loss",
+    title: "Weight loss",
+    kicker: "Move",
+    copy: "Consistent training, conditioning and accountability for a stronger, healthier you.",
+    image: "/images/woman-train.jpg",
   },
   {
     slug: "bodybuilding",
     title: "Bodybuilding",
     kicker: "Physique",
-    copy: "Stage prep and off-season volume. Members compete — including a 2026 Western Province medal.",
+    copy: "Stage prep and off-season volume with coaching that keeps every session purposeful.",
     image: "/images/physique.jpg",
-    href: "/training",
-    hash: "bodybuilding",
-  },
-  {
-    slug: "coaching",
-    title: "Personal coaching",
-    kicker: "Coach",
-    copy: "Work with Saranga Lakmal. Programming, form, and accountability — not a poster on the wall.",
-    image: "/images/coach.jpg",
-    href: "/training",
-    hash: "coaching",
-  },
-  {
-    slug: "beach",
-    title: "Beach training",
-    kicker: "Coast",
-    copy: "Physical fitness sessions on Wadduwa beach. Sun, sand, and conditioning that does not live indoors.",
-    image: "/images/beach.jpg",
-    href: "/training",
-    hash: "beach",
   },
 ] as const;
 

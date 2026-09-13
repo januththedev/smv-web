@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { nav, site, waJoin } from "@/lib/site";
@@ -103,13 +103,13 @@ export function MagneticNav() {
 
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <a href={`tel:${site.phoneTel}`}>
-                <Phone className="size-3.5" />
-                Call
+              <a href={waJoin()}>
+                <MessageCircle className="size-3.5" />
+                WhatsApp
               </a>
             </Button>
             <Button asChild size="sm" className="hidden sm:inline-flex pr-3.5">
-              <a href={waJoin()}>Join</a>
+              <Link to="/membership">Join</Link>
             </Button>
             <button
               type="button"

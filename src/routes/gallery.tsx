@@ -8,7 +8,7 @@ export const Route = createFileRoute("/gallery")({
   component: Gallery,
   head: () => ({
     meta: [
-      { title: `Floor — ${site.fullName}` },
+      { title: `Gallery — ${site.fullName}` },
       {
         name: "description",
         content: "Inside SMV GYM Wadduwa — our gym, the coast and our community.",

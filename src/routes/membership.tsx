@@ -77,12 +77,36 @@ function Membership() {
           <ul className="mt-8 space-y-3 text-sm text-fg/85">
             <li>Open every day — confirm the hours when you call.</li>
             <li>Coaching with {site.coach}.</li>
-            <li>Beach sessions when the program is running.</li>
-            <li>A community that actually competes.</li>
+            <li>Weight gain, weight loss and bodybuilding coaching.</li>
+            <li>A community that trains together.</li>
           </ul>
         </div>
         <div className="md:col-span-6 md:col-start-7">
           <JoinForm />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
+        <div className="overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
+          <div className="grid gap-8 p-6 md:grid-cols-[0.8fr_1.2fr] md:p-10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-iron">Visit SMV</p>
+              <h2 className="mt-3 font-display text-5xl font-semibold uppercase leading-[0.9] tracking-tight">
+                Find us on Galle Road.
+              </h2>
+              <p className="mt-4 text-muted">{site.address}</p>
+              <a className="mt-6 inline-flex text-sm text-fg no-underline hover:text-iron" href={site.mapsUrl} target="_blank" rel="noreferrer">
+                Open directions
+              </a>
+            </div>
+            <iframe
+              title="Map of SMV GYM Wadduwa"
+              src={site.mapsEmbed}
+              className="h-80 w-full border-0 md:h-96"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
       </section>
     </main>

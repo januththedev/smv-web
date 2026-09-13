@@ -39,8 +39,8 @@ function Home() {
             Visit us for a first session and see if SMV is right for you.
           </p>
           <Button asChild variant="ghost" className="mt-8 pr-3.5">
-            <Link to="/about">
-              The story <ArrowUpRight className="size-4" />
+            <Link to="/membership">
+              Join SMV <ArrowUpRight className="size-4" />
             </Link>
           </Button>
         </div>
@@ -52,17 +52,11 @@ function Home() {
             <h2 className="font-display text-4xl font-semibold uppercase tracking-tight md:text-5xl">
               How we train
             </h2>
-            <Link
-              to="/training"
-              className="hidden text-sm text-muted no-underline hover:text-fg sm:inline"
-            >
-              All training
-            </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {programs.map((p) => (
               <SpotlightCard key={p.slug} className="min-h-[22rem]">
-                <Link to="/training" hash={p.slug} className="relative block h-full no-underline">
+                <div className="relative block h-full">
                   <img
                     src={p.image}
                     alt=""
@@ -76,7 +70,7 @@ function Home() {
                     </h3>
                     <p className="mt-2 max-w-sm text-sm text-fg/80">{p.copy}</p>
                   </div>
-                </Link>
+                </div>
               </SpotlightCard>
             ))}
           </div>
@@ -84,41 +78,8 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-24 md:px-8">
-        <p className="text-xs uppercase tracking-[0.22em] text-muted">South coast</p>
-        <ScrubHeading text="Train on the sand. Lift on Galle Road." />
-      </section>
-
-      <section className="relative overflow-hidden">
-        <img
-          src="/images/sri-lanka.jpg"
-          alt="South coast of Sri Lanka"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-bg/70" />
-        <div className="relative mx-auto grid max-w-6xl gap-8 px-5 py-24 md:grid-cols-2 md:px-8">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-iron">Beach program</p>
-            <h2 className="mt-3 font-display text-5xl font-semibold uppercase leading-[0.9] tracking-tight">
-              Physical fitness, Wadduwa beach.
-            </h2>
-          </div>
-          <div className="flex flex-col justify-end">
-            <p className="text-lg text-fg/85">
-              SMV runs outdoor conditioning on the coast — the session the Facebook page still
-              shares the beach training program. Same coach, a different place to train.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild>
-                <a href={waJoin("Hi SMV — I want the next beach training session.")}>
-                  Join a beach session
-                </a>
-              </Button>
-              <Button asChild variant="ghost">
-                <Link to="/events">See events</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+        <p className="text-xs uppercase tracking-[0.22em] text-muted">Your next chapter</p>
+        <ScrubHeading text="Gain. Lose. Build." />
       </section>
 
       <section className="border-y border-line bg-surface">
@@ -145,7 +106,7 @@ function Home() {
             On the calendar
           </h2>
           <Link to="/events" className="text-sm text-muted no-underline hover:text-fg">
-            All events
+            All news
           </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
@@ -223,7 +184,7 @@ function Home() {
               <a href={waJoin()}>WhatsApp</a>
             </Button>
             <Button asChild variant="ghost" size="lg">
-              <Link to="/contact">Map and hours</Link>
+              <Link to="/membership">Map and hours</Link>
             </Button>
           </div>
         </div>
