@@ -11,7 +11,7 @@ export const Route = createFileRoute("/gallery")({
       { title: `Floor — ${site.fullName}` },
       {
         name: "description",
-        content: "Inside SMV GYM Wadduwa — the floor, the coast, and the community.",
+        content: "Inside SMV GYM Wadduwa — our gym, the coast and our community.",
       },
     ],
   }),
@@ -32,7 +32,7 @@ function Gallery() {
     <main id="main">
       <PageHero
         kicker="Gallery"
-        title="The floor."
+        title="Inside SMV GYM."
         lede="See our gym, our members and our training sessions. Tap a photo to open it."
       />
 

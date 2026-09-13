@@ -105,7 +105,7 @@ function Home() {
           <div className="flex flex-col justify-end">
             <p className="text-lg text-fg/85">
               SMV runs outdoor conditioning on the coast — the session the Facebook page still
-              posts as the beach training program. Same coach. Different floor.
+              shares the beach training program. Same coach, a different place to train.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild>
@@ -169,7 +169,7 @@ function Home() {
 
       <section className="mx-auto max-w-6xl px-5 pb-20 md:px-8">
         <h2 className="font-display text-4xl font-semibold uppercase tracking-tight">
-          From the floor
+            Member stories
         </h2>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {quotes.map((q) => (
@@ -199,7 +199,7 @@ function Home() {
             ))}
           </div>
           <div className="flex items-center justify-between bg-surface px-5 py-4">
-            <p className="text-sm text-muted">The floor, the coast, the work.</p>
+            <p className="text-sm text-muted">Our gym, our coast, our community.</p>
             <Link to="/gallery" className="text-sm text-fg no-underline hover:text-iron">
               Open gallery
             </Link>

@@ -62,7 +62,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-6xl flex-col justify-end px-5 pb-16 pt-32 md:px-8 md:pb-20">
         <img
           data-hero
-          src="/images/smv-logo.png"
+          src={content.logoUrl}
           alt="SMV GYM Wadduwa"
           className="mb-5 h-16 w-16 object-contain outline-none md:h-20 md:w-20"
         />
@@ -85,7 +85,7 @@ export function Hero() {
             <a href={waJoin()}>Start on WhatsApp</a>
           </Button>
           <Button asChild variant="ghost" size="lg">
-            <a href={`tel:${site.phoneTel}`}>Call the floor</a>
+            <a href={`tel:${site.phoneTel}`}>Call us</a>
           </Button>
         </div>
       </div>

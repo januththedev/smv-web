@@ -146,7 +146,7 @@ export function MagneticNav() {
         </ul>
         <div className="mt-8 flex flex-col gap-3">
           <Button asChild size="lg">
-            <a href={waJoin()}>WhatsApp the floor</a>
+            <a href={waJoin()}>WhatsApp us</a>
           </Button>
           <Button asChild variant="ghost" size="lg">
             <a href={`tel:${site.phoneTel}`}>{site.phone}</a>

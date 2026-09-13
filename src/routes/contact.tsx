@@ -11,7 +11,7 @@ export const Route = createFileRoute("/contact")({
       { title: `Visit — ${site.fullName}` },
       {
         name: "description",
-        content: `Visit SMV GYM at ${site.address}. Call ${site.phone} or WhatsApp the floor.`,
+        content: `Visit SMV GYM at ${site.address}. Call ${site.phone} or WhatsApp us.`,
       },
     ],
   }),
@@ -102,7 +102,7 @@ function Contact() {
         <div className="grid gap-10 rounded-xl bg-surface p-6 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)] md:grid-cols-12 md:p-10">
           <div className="md:col-span-5">
             <h2 className="font-display text-4xl font-semibold uppercase tracking-tight">
-              Write to the floor
+              Contact SMV GYM
             </h2>
             <p className="mt-3 text-muted">
               WhatsApp is the fastest way to contact us. Fill in the form and we will reply.

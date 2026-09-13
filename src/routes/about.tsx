@@ -57,7 +57,7 @@ function About() {
             },
             {
               t: "Compete",
-              d: "Western Province bodybuilding, 2026 — a bronze from this floor. Training that has somewhere to go.",
+              d: "Western Province bodybuilding, 2026 — a bronze from one of our members.",
             },
             {
               t: "Coast",

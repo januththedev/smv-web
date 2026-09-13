@@ -21,11 +21,11 @@ export const Route = createFileRoute("/membership")({
 const paths = [
   {
     title: "Walk-in day",
-    copy: "See the floor, meet the coach, lift. We will tell you if this is the right gym before you pay for a month.",
+    copy: "See the gym, meet the coach and try a session. We will help you decide before you pay for a month.",
   },
   {
     title: "Monthly & longer",
-    copy: "Quoted in person. Rates change with how you train — open floor, coaching, or contest prep — so we do not post a fake menu.",
+    copy: "Membership depends on how you want to train. Ask us for the current price when you visit or message us.",
   },
   {
     title: "Coaching add-on",
@@ -69,13 +69,13 @@ function Membership() {
         <div className="md:col-span-5">
           <p className="text-xs uppercase tracking-[0.22em] text-iron">Enquire</p>
           <h2 className="mt-3 font-display text-5xl font-semibold uppercase leading-[0.9] tracking-tight">
-            Tell us what you want from the floor.
+            Tell us your fitness goal.
           </h2>
           <p className="mt-4 text-muted">
             Tell us your goal. We will reply on WhatsApp or by phone and help you choose the right plan.
           </p>
           <ul className="mt-8 space-y-3 text-sm text-fg/85">
-            <li>Open floor, seven days — confirm hours when you call.</li>
+            <li>Open every day — confirm the hours when you call.</li>
             <li>Coaching with {site.coach}.</li>
             <li>Beach sessions when the program is running.</li>
             <li>A community that actually competes.</li>
