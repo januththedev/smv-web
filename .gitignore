@@ -1,0 +1,16 @@
+node_modules
+.output
+.vinxi
+.tanstack
+dist
+.env
+.env.*
+*.log
+.DS_Store
+.nitro
+.wrangler
+screenshots
+artifacts
+.grok
+*.local
+routeTree.gen.ts
