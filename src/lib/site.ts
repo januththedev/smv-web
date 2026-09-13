@@ -5,7 +5,7 @@ export const site = {
   tagline: "Train strong. Feel good.",
   city: "Wadduwa",
   country: "Sri Lanka",
-  sinhalaPlace: "වාද්දුව",
+  sinhalaPlace: "Wadduwa",
   address: "567/2/1, Galle Road, Wadduwa, Sri Lanka",
   addressLine: "567/2/1, Galle Road",
   phone: "+94 71 273 8110",

@@ -6,7 +6,7 @@ const ITEMS = [
   "Strength",
   "Bodybuilding",
   "Beach training",
-  site.sinhalaPlace,
+  "Wadduwa",
   "Personal coaching",
   "South coast",
   "Galle Road",

@@ -69,14 +69,14 @@ export function MagneticNav() {
       >
         <nav
           aria-label="Primary"
-          className="glass-dock flex w-full max-w-5xl items-center justify-between gap-2 rounded-full px-2 py-1.5 pl-4"
+          className="glass-dock flex w-full max-w-5xl items-center justify-between gap-2 rounded-full px-2 py-0.5 pl-3"
         >
           <Link
             to="/"
             className="flex items-baseline gap-2 py-2 pr-2 no-underline"
             aria-label={`${site.fullName} home`}
           >
-            <img src="/images/smv-logo.png" alt="SMV GYM" className="size-10 object-contain outline-none" />
+            <img src="/images/smv-logo.png" alt="SMV GYM" className="size-8 object-contain outline-none" />
             <span className="hidden text-[0.65rem] uppercase tracking-[0.22em] text-muted sm:inline">
               Wadduwa
             </span>

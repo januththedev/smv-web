@@ -27,7 +27,7 @@ function Home() {
         <div className="md:col-span-5">
           <p className="text-xs uppercase tracking-[0.22em] text-iron">Galle Road</p>
           <h2 className="mt-3 font-display text-5xl font-semibold uppercase leading-[0.92] tracking-tight md:text-6xl">
-            A real gym for Wadduwa.
+            A friendly gym in Wadduwa.
           </h2>
         </div>
         <div className="md:col-span-6 md:col-start-7">
