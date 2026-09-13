@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X, MessageCircle, Facebook } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { nav, site, waJoin } from "@/lib/site";
@@ -105,21 +105,8 @@ export function MagneticNav() {
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <a href={waJoin()}>
                 <MessageCircle className="size-3.5" />
-                WhatsApp
+                Join
               </a>
-            </Button>
-            <a
-              href={site.facebook}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="SMV GYM on Facebook"
-              title="SMV GYM on Facebook"
-              className="hidden size-9 items-center justify-center rounded-full text-muted no-underline hover:text-fg sm:inline-flex"
-            >
-              <Facebook className="size-4" />
-            </a>
-            <Button asChild size="sm" className="hidden sm:inline-flex pr-3.5">
-              <Link to="/membership">Join</Link>
             </Button>
             <button
               type="button"

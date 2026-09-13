@@ -27,14 +27,12 @@ function Events() {
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
-        <div className="overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
-          <iframe
-            title="SMV GYM Facebook news"
-            data-facebook-embed="live"
-            src={site.facebookEmbed}
-            className="h-[760px] w-full border-0 bg-white"
-            loading="lazy"
-          />
+        <div className="rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
+          <h2 className="font-display text-3xl font-semibold uppercase tracking-tight">Latest from SMV</h2>
+          <p className="mt-3 max-w-xl text-muted">See the latest posts, announcements and photos directly on our Facebook page.</p>
+          <a className="mt-6 inline-flex rounded-full bg-fg px-5 py-3 text-sm text-bg no-underline hover:bg-iron hover:text-fg" href={site.facebook} target="_blank" rel="noreferrer">
+            Open SMV on Facebook
+          </a>
         </div>
 
         <div className="mt-20 rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
