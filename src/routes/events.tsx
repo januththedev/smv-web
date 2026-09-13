@@ -22,7 +22,7 @@ function Events() {
     <main id="main">
       <PageHero
         kicker="Events"
-        title="The gym outside the gym."
+        title="Events for our members."
         lede="Championships, a cricket tournament, and beach sessions. SMV is a community that trains together and then keeps going."
       />
 

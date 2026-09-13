@@ -38,7 +38,7 @@ function Membership() {
     <main id="main">
       <PageHero
         kicker="Membership"
-        title="Come lift. Then decide."
+        title="Come and try the gym."
         lede="No brochure prices. SMV is a neighbourhood gym — you join by walking in, calling, or sending a WhatsApp."
       >
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -33,7 +33,7 @@ function Gallery() {
       <PageHero
         kicker="Gallery"
         title="The floor."
-        lede="Iron, coast, and the people who keep coming back. Tap a frame to open it."
+        lede="See our gym, our members and our training sessions. Tap a photo to open it."
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-6 md:px-8">

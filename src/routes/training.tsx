@@ -57,7 +57,7 @@ function Training() {
     <main id="main">
       <PageHero
         kicker="Training"
-        title="Four ways to work."
+        title="Choose your training."
         lede="Strength, physique, a coach who stays on the floor, and the Indian Ocean as a second gym. Pick a lane — or use all of them."
       />
 
@@ -90,7 +90,7 @@ function Training() {
         <div className="mt-24 flex flex-col items-start gap-4 rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)] md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="font-display text-3xl font-semibold uppercase tracking-tight">
-              Walk in. Ask for Saranga.
+              Come in and talk to us.
             </h2>
             <p className="mt-2 text-muted">Membership is quoted on the floor — not guessed on a page.</p>
           </div>
