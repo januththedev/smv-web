@@ -76,9 +76,7 @@ export function MagneticNav() {
             className="flex items-baseline gap-2 py-2 pr-2 no-underline"
             aria-label={`${site.fullName} home`}
           >
-            <span className="font-display text-xl font-semibold tracking-[0.08em] text-fg">
-              SMV
-            </span>
+            <img src="/images/smv-logo.png" alt="SMV GYM" className="size-10 object-contain outline-none" />
             <span className="hidden text-[0.65rem] uppercase tracking-[0.22em] text-muted sm:inline">
               Wadduwa
             </span>

@@ -2,7 +2,7 @@ export const site = {
   name: "SMV GYM",
   shortName: "SMV",
   fullName: "SMV GYM Wadduwa",
-  tagline: "The Best Gym in the City",
+  tagline: "Train strong. Feel good.",
   city: "Wadduwa",
   country: "Sri Lanka",
   sinhalaPlace: "වාද්දුව",
@@ -23,7 +23,7 @@ export const site = {
   instagramAlt: "https://www.instagram.com/smv.gym.wadduwa/",
   instagramHandle: "@smv_gym_wadduwa",
   coach: "Saranga Lakmal",
-  hoursNote: "Open daily. Call before you travel so we can meet you on the floor.",
+  hoursNote: "Open every day. Call us before you come.",
   community: {
     likes: "3,360",
     checkins: "2,718",
