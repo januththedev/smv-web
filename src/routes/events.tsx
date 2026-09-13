@@ -63,7 +63,7 @@ function Events() {
             Want in on the next one?
           </h2>
           <p className="mt-3 max-w-xl text-muted">
-            Dates move on the Facebook page first. Message the floor and we will put you on the list.
+            Dates are shared on Facebook first. Message us and we will add you to the list.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button asChild>

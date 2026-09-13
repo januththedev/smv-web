@@ -23,7 +23,7 @@ function About() {
       <PageHero
         kicker="About"
         title={site.tagline}
-        lede="A south-coast gym with a coach’s name on the door, a bodybuilding bench, and a cricket team. Not a chain. Not a hotel spa."
+        lede="A local gym in Wadduwa for people who want to get stronger and healthier."
       />
 
       <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-20 md:grid-cols-12 md:px-8">
@@ -37,15 +37,13 @@ function About() {
         <div className="md:col-span-5 md:col-start-8">
           <p className="text-xs uppercase tracking-[0.22em] text-iron">{site.coach}</p>
           <h2 className="mt-3 font-display text-5xl font-semibold uppercase leading-[0.9] tracking-tight">
-            The floor has a name.
+            A gym for our community.
           </h2>
           <p className="mt-5 text-lg text-muted">
-            Saranga Lakmal runs SMV from {site.addressLine}. The Facebook page still answers
-            comments like a person, not a brand kit. That is the point.
+            Saranga Lakmal runs SMV from {site.addressLine}. He helps members train safely and stay on track.
           </p>
           <p className="mt-4 text-muted">
-            Members call it the best gym in Wadduwa because someone watches the lift, someone
-            posts the medal, and someone organises cricket when the season asks for it.
+            Members come here because the gym is friendly, the coach is present and everyone can train at their own level.
           </p>
         </div>
       </section>
@@ -81,8 +79,7 @@ function About() {
             South of Colombo. On the road to Galle.
           </h2>
           <p className="mt-5 text-muted">
-            Wadduwa is a coastal town, not a downtown mall. SMV sits on Galle Road so you can
-            train before work, after the beach, or on the way home.
+            SMV is on Galle Road, so you can train before work, after the beach or on the way home.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild>

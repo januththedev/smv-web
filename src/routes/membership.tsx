@@ -39,7 +39,7 @@ function Membership() {
       <PageHero
         kicker="Membership"
         title="Come and try the gym."
-        lede="No brochure prices. SMV is a neighbourhood gym — you join by walking in, calling, or sending a WhatsApp."
+        lede="Visit us, call us or send a WhatsApp message. We will explain the membership clearly."
       >
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
@@ -72,7 +72,7 @@ function Membership() {
             Tell us what you want from the floor.
           </h2>
           <p className="mt-4 text-muted">
-            We will come back on WhatsApp or a call. Bring a goal. Leave with a plan.
+            Tell us your goal. We will reply on WhatsApp or by phone and help you choose the right plan.
           </p>
           <ul className="mt-8 space-y-3 text-sm text-fg/85">
             <li>Open floor, seven days — confirm hours when you call.</li>

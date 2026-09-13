@@ -58,7 +58,7 @@ function Training() {
       <PageHero
         kicker="Training"
         title="Choose your training."
-        lede="Strength, physique, a coach who stays on the floor, and the Indian Ocean as a second gym. Pick a lane — or use all of them."
+        lede="Build strength, improve your fitness, train for bodybuilding or join a beach session."
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
@@ -92,7 +92,7 @@ function Training() {
             <h2 className="font-display text-3xl font-semibold uppercase tracking-tight">
               Come in and talk to us.
             </h2>
-            <p className="mt-2 text-muted">Membership is quoted on the floor — not guessed on a page.</p>
+            <p className="mt-2 text-muted">Ask us about membership when you visit or message us.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild>
