@@ -62,3 +62,10 @@ export async function listSiteVersions(): Promise<SiteVersion[]> {
   const rows = await sql<{ id: string; label: string; content: SiteContent; created_at: string }>`select id, label, content, created_at from site_versions order by created_at desc limit 5`;
   return rows.map((row) => ({ ...cleanContent(row.content), id: row.id, label: row.label, createdAt: String(row.created_at) }));
 }
+
+export async function restoreSiteVersion(id: string): Promise<SiteContent> {
+  const sql = await getSql();
+  const rows = await sql<{ content: SiteContent }>`select content from site_versions where id = ${id}`;
+  if (!rows[0]) throw new Error("Version not found");
+  return updateSiteContent(rows[0].content);
+}
