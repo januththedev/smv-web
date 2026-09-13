@@ -30,6 +30,7 @@ function Events() {
         <div className="overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
           <iframe
             title="SMV GYM Facebook news"
+            data-facebook-embed="live"
             src={site.facebookEmbed}
             className="h-[760px] w-full border-0 bg-white"
             loading="lazy"
