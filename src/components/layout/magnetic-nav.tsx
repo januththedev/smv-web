@@ -9,9 +9,8 @@ import { cn } from "@/lib/utils";
 export function MagneticNav() {
   const content = useSiteContent();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const [hidden, setHidden] = useState(false);
+  const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
-  const lastY = useRef(0);
 
   useEffect(() => {
     setOpen(false);
@@ -19,32 +18,11 @@ export function MagneticNav() {
   }, [pathname]);
 
   useEffect(() => {
-    const onScroll = (e: Event) => {
-      const direction = (e as CustomEvent).detail?.direction ?? 0;
-      const y = window.scrollY;
-      if (y < 24) {
-        setHidden(false);
-        lastY.current = y;
-        return;
-      }
-      if (open) {
-        setHidden(false);
-        return;
-      }
-      setHidden(direction === 1 && y > lastY.current + 8);
-      lastY.current = y;
-    };
-    const onWin = () => {
-      const y = window.scrollY;
-      if (y < 24) setHidden(false);
-      else if (!open) setHidden(y > lastY.current);
-      lastY.current = y;
-    };
-    window.addEventListener("smv-scroll", onScroll);
-    window.addEventListener("scroll", onWin, { passive: true });
+    const onScroll = () => setCompact(window.scrollY > 32 && !open);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("smv-scroll", onScroll);
-      window.removeEventListener("scroll", onWin);
+      window.removeEventListener("scroll", onScroll);
     };
   }, [open]);
 
@@ -65,20 +43,23 @@ export function MagneticNav() {
       </a>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] md:px-4 md:pt-4",
-          hidden && !open ? "-translate-y-[120%]" : "translate-y-0",
+          "fixed inset-x-0 top-0 z-50 flex justify-center transition-[padding] duration-300 ease-out",
+          compact ? "px-5 pt-2 md:px-8" : "px-3 pt-3 md:px-4 md:pt-4",
         )}
       >
         <nav
           aria-label="Primary"
-          className="glass-dock flex w-full max-w-6xl items-center justify-between gap-2 rounded-full px-2 py-1 pl-3"
+          className={cn(
+            "glass-dock flex w-full items-center justify-between gap-2 rounded-full px-2 pl-3 transition-[max-width,padding] duration-300 ease-out",
+            compact ? "max-w-5xl py-0.5" : "max-w-6xl py-1",
+          )}
         >
           <Link
             to="/"
             className="flex items-baseline gap-2 py-1.5 pr-2 no-underline"
             aria-label={`${site.fullName} home`}
           >
-            <img src={content.logoUrl} alt="SMV GYM" className="size-7 object-contain outline-none" />
+            <img src={content.logoUrl} alt="SMV GYM" className={cn("object-contain outline-none transition-[width,height] duration-300", compact ? "size-6" : "size-7")} />
             <span className="hidden text-[0.65rem] uppercase tracking-[0.22em] text-muted sm:inline">
               Wadduwa
             </span>
@@ -94,6 +75,7 @@ export function MagneticNav() {
                       ? pathname === "/"
                       : pathname.startsWith(item.href)
                   }
+                  compact={compact}
                 >
                   {item.label}
                 </MagneticLink>
@@ -159,10 +141,12 @@ export function MagneticNav() {
 function MagneticLink({
   href,
   active,
+  compact,
   children,
 }: {
   href: string;
   active: boolean;
+  compact: boolean;
   children: string;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
@@ -189,7 +173,8 @@ function MagneticLink({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={cn(
-        "inline-flex h-10 items-center rounded-full px-3.5 text-[0.8rem] tracking-wide no-underline transition-[color,background-color,transform] duration-150 ease-out will-change-transform",
+        "inline-flex items-center rounded-full text-[0.8rem] tracking-wide no-underline transition-[color,background-color,transform,padding,height] duration-300 ease-out will-change-transform",
+        compact ? "h-8 px-3" : "h-10 px-3.5",
         active
           ? "bg-fg/10 text-fg shadow-[0_1px_0_rgb(255_255_255_/_10%)_inset]"
           : "text-muted hover:text-fg",
