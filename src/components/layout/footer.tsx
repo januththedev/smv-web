@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { nav, site } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 
 export function Footer() {
+  const content = useSiteContent();
   return (
     <footer className="border-t border-line bg-surface">
       <div className="mx-auto grid max-w-6xl gap-12 px-5 py-16 md:grid-cols-12 md:px-8">
         <div className="md:col-span-5">
-          <p className="font-display text-5xl font-semibold uppercase tracking-tight text-fg">
-            SMV GYM
-          </p>
+          <img src={content.logoUrl} alt="SMV GYM Wadduwa" className="h-16 w-16 object-contain outline-none" />
           <p className="mt-2 text-sm uppercase tracking-[0.2em] text-iron">
             Galle Road · Wadduwa
           </p>

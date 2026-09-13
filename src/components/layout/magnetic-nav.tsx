@@ -3,9 +3,11 @@ import { Menu, X, Phone } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { nav, site, waJoin } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 import { cn } from "@/lib/utils";
 
 export function MagneticNav() {
+  const content = useSiteContent();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
@@ -76,7 +78,7 @@ export function MagneticNav() {
             className="flex items-baseline gap-2 py-2 pr-2 no-underline"
             aria-label={`${site.fullName} home`}
           >
-            <img src="/images/smv-logo.png" alt="SMV GYM" className="size-8 object-contain outline-none" />
+            <img src={content.logoUrl} alt="SMV GYM" className="size-8 object-contain outline-none" />
             <span className="hidden text-[0.65rem] uppercase tracking-[0.22em] text-muted sm:inline">
               Wadduwa
             </span>
