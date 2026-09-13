@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { site, waJoin } from "@/lib/site";
+
+type NewsPost = {
+  id: string;
+  message?: string;
+  created_time?: string;
+  permalink_url?: string;
+  full_picture?: string;
+};
 
 export const Route = createFileRoute("/events")({
   component: Events,
@@ -18,6 +27,19 @@ export const Route = createFileRoute("/events")({
 });
 
 function Events() {
+  const [posts, setPosts] = useState<NewsPost[]>([]);
+  const [configured, setConfigured] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/facebook-news")
+      .then((response) => response.json())
+      .then((data: { configured?: boolean; posts?: NewsPost[] }) => {
+        setConfigured(data.configured !== false);
+        setPosts(data.posts ?? []);
+      })
+      .catch(() => setConfigured(false));
+  }, []);
+
   return (
     <main id="main">
       <PageHero
@@ -27,14 +49,29 @@ function Events() {
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
-        <div className="overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
-          <iframe
-            title="SMV GYM Facebook news"
-            src={site.facebookEmbed}
-            className="h-[760px] w-full border-0 bg-white"
-            loading="lazy"
-          />
-        </div>
+        {posts.length ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {posts.map((post) => (
+              <article key={post.id} className="overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
+                {post.full_picture ? <img src={post.full_picture} alt="" className="aspect-[16/9] w-full object-cover" /> : null}
+                <div className="p-6">
+                  <p className="text-xs uppercase tracking-[0.18em] text-iron">
+                    {post.created_time ? new Date(post.created_time).toLocaleDateString() : "SMV News"}
+                  </p>
+                  <p className="mt-4 whitespace-pre-wrap text-muted">{post.message ?? "SMV GYM update"}</p>
+                  {post.permalink_url ? <a className="mt-5 inline-flex text-sm text-fg no-underline hover:text-iron" href={post.permalink_url} target="_blank" rel="noreferrer">View post</a> : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
+            <h2 className="font-display text-3xl font-semibold uppercase tracking-tight">Latest from SMV</h2>
+            <p className="mt-3 max-w-xl text-muted">
+              {configured ? "Loading the latest updates from Facebook..." : "Connect the Facebook Page access token to show the latest 10 posts here."}
+            </p>
+          </div>
+        )}
 
         <div className="mt-20 rounded-xl bg-surface p-8 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
           <h2 className="font-display text-3xl font-semibold uppercase tracking-tight">

@@ -20,6 +20,10 @@
       "dest": "/api/mcp"
     },
     {
+      "src": "/api/facebook-news",
+      "dest": "/api/facebook-news"
+    },
+    {
       "src": "/api/content",
       "dest": "/api/content"
     },
