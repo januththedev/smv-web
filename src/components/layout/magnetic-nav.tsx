@@ -75,10 +75,10 @@ export function MagneticNav() {
         >
           <Link
             to="/"
-            className="flex items-baseline gap-2 py-2 pr-2 no-underline"
+            className="flex items-baseline gap-2 py-1.5 pr-2 no-underline"
             aria-label={`${site.fullName} home`}
           >
-            <img src={content.logoUrl} alt="SMV GYM" className="size-8 object-contain outline-none" />
+            <img src={content.logoUrl} alt="SMV GYM" className="size-7 object-contain outline-none" />
             <span className="hidden text-[0.65rem] uppercase tracking-[0.22em] text-muted sm:inline">
               Wadduwa
             </span>
@@ -113,7 +113,7 @@ export function MagneticNav() {
             </Button>
             <button
               type="button"
-              className="inline-flex size-11 items-center justify-center rounded-full text-fg lg:hidden"
+              className="inline-flex size-10 items-center justify-center rounded-full text-fg lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-nav"
               onClick={() => setOpen((v) => !v)}
