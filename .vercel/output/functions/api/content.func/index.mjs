@@ -464,7 +464,6 @@ var _lazy_dNrU9S = defineLazyEventHandler(() => import("./_routes/api/admin/sess
 var _lazy_S6_vRh = defineLazyEventHandler(() => import("./_routes/api/admin/upload.mjs"));
 var _lazy_u9BjIJ = defineLazyEventHandler(() => import("./_routes/api/admin/versions.mjs"));
 var _lazy_YmXRTp = defineLazyEventHandler(() => import("./_routes/api/content.mjs"));
-var _lazy_m3bIdf = defineLazyEventHandler(() => import("./_routes/api/facebook_news.mjs"));
 var _lazy_I3d0az = defineLazyEventHandler(() => import("./_routes/api/mcp.mjs"));
 var _lazy_V998dz = defineLazyEventHandler(() => import("./_chunks/ssr-renderer.mjs"));
 var findRoute = /* @__PURE__ */ (() => {
@@ -491,13 +490,9 @@ var findRoute = /* @__PURE__ */ (() => {
 		method: "get",
 		handler: _lazy_YmXRTp
 	}, $6 = {
-		route: "/api/facebook-news",
-		method: "get",
-		handler: _lazy_m3bIdf
-	}, $7 = {
 		route: "/api/mcp",
 		handler: _lazy_I3d0az
-	}, $8 = {
+	}, $7 = {
 		route: "/**",
 		handler: _lazy_V998dz
 	};
@@ -513,13 +508,11 @@ var findRoute = /* @__PURE__ */ (() => {
 		} else if (p === "/api/admin/versions") return { data: $4 };
 		else if (p === "/api/content") {
 			if (m === "GET") return { data: $5 };
-		} else if (p === "/api/facebook-news") {
-			if (m === "GET") return { data: $6 };
-		} else if (p === "/api/mcp") return { data: $7 };
+		} else if (p === "/api/mcp") return { data: $6 };
 		let s = p.split("/");
 		s.length;
 		return {
-			data: $8,
+			data: $7,
 			params: { "_": s.slice(1).join("/") }
 		};
 	};
