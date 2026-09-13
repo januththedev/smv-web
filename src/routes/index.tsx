@@ -32,13 +32,11 @@ function Home() {
         </div>
         <div className="md:col-span-6 md:col-start-7">
           <p className="text-lg text-muted">
-            SMV is not a hotel fitness room. It is {site.coach}'s floor — bodybuilding,
-            strength, and a community that shows up for championships, cricket, and sunrise
-            sessions on the sand.
+            SMV is a local gym for strength, fitness and bodybuilding. Our coach and members
+            are here to help you train safely and keep going.
           </p>
           <p className="mt-4 text-muted">
-            {site.community.checkins} people have trained here. {site.community.likes} follow
-            the page. Members still write the same sentence: best gym in the city.
+            Visit us for a first session and see if SMV is right for you.
           </p>
           <Button asChild variant="ghost" className="mt-8 pr-3.5">
             <Link to="/about">

@@ -11,7 +11,7 @@ export function Footer() {
             SMV GYM
           </p>
           <p className="mt-2 text-sm uppercase tracking-[0.2em] text-iron">
-            {site.sinhalaPlace} · {site.city}
+            Galle Road · Wadduwa
           </p>
           <p className="mt-5 max-w-sm text-muted">{site.tagline}. On Galle Road, not in a brochure.</p>
         </div>

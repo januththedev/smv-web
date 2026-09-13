@@ -60,8 +60,14 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-6xl flex-col justify-end px-5 pb-16 pt-32 md:px-8 md:pb-20">
+        <img
+          data-hero
+          src="/images/smv-logo.png"
+          alt="SMV GYM Wadduwa"
+          className="mb-5 h-16 w-16 object-contain outline-none md:h-20 md:w-20"
+        />
         <p data-hero className="text-xs uppercase tracking-[0.28em] text-fg/70">
-          {site.sinhalaPlace} · Galle Road · {site.city}
+          Galle Road · Wadduwa · Sri Lanka
         </p>
         <h1
           data-hero
@@ -72,7 +78,7 @@ export function Hero() {
           GYM
         </h1>
         <p data-hero className="mt-6 max-w-md text-lg text-fg/80 md:text-xl">
-          {content.headline}. {content.intro}
+          {content.headline} {content.intro}
         </p>
         <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
