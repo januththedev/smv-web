@@ -9,8 +9,5 @@ dist
 .DS_Store
 .nitro
 .wrangler
-screenshots
-artifacts
-.grok
 *.local
 routeTree.gen.ts
