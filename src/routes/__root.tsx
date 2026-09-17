@@ -30,7 +30,7 @@ export const Route = createRootRoute({
       { name: "robots", content: "index,follow" },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: "/images/smv-logo.png" },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/images/smv-logo.png" },

@@ -16,17 +16,27 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     gsap.registerPlugin(ScrollTrigger);
 
-    if (reduce) {
+    if (reduce || coarse) {
       ScrollTrigger.normalizeScroll(false);
-      return;
+      const onScroll = () => {
+        window.dispatchEvent(
+          new CustomEvent("smv-scroll", {
+            detail: { velocity: 0, direction: 1 },
+          }),
+        );
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => window.removeEventListener("scroll", onScroll);
     }
 
     const lenis = new Lenis({
       autoRaf: false,
       lerp: 0.09,
       smoothWheel: true,
+      syncTouch: false,
     });
     window.__lenis = lenis;
 

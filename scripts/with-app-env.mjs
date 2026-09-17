@@ -111,7 +111,11 @@ function main(argv) {
     process.exit(2);
   }
   const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
-  const child = spawn(command, args, { stdio: "inherit", env, shell: process.platform === "win32" });
+  // Native Windows executables accept an argv array directly. Routing them
+  // through cmd.exe splits paths with spaces and interprets argument contents.
+  // Keep the shell for npm's extensionless/.cmd shims (e.g. `vite`).
+  const shell = process.platform === "win32" && !/\.(?:exe|com)$/i.test(command);
+  const child = spawn(command, args, { stdio: "inherit", env, shell });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
     process.on(signal, () => child.kill(signal));

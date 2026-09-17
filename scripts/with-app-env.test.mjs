@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import {
@@ -92,6 +92,28 @@ test("the wrapped command sees an explicit override, not the file value", async 
   assert.equal(stdout, "true");
 });
 
+test("the wrapper preserves native command arguments without shell interpretation", async () => {
+  const args = ["two words", 'a "quoted" value', "", "a&b", "C:\\trailing slash\\"];
+  const { stdout } = await execFileAsync(process.execPath, [
+    WRAPPER,
+    process.execPath,
+    "-e",
+    "process.stdout.write(JSON.stringify(process.argv.slice(1)))",
+    "--",
+    ...args,
+  ]);
+  assert.deepEqual(JSON.parse(stdout), args);
+});
+
+test("the wrapper still runs the npm Vite command shim", async () => {
+  const binDir = join(projectRoot(), "node_modules/.bin");
+  const pathKey = Object.keys(process.env).find((key) => key.toLowerCase() === "path") ?? "PATH";
+  const { stdout } = await execFileAsync(process.execPath, [WRAPPER, "vite", "--version"], {
+    env: { ...process.env, [pathKey]: `${binDir}${delimiter}${process.env[pathKey] ?? ""}` },
+  });
+  assert.match(stdout, /vite\/\d/);
+});
+
 test("the wrapper propagates the command's exit code", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [WRAPPER, process.execPath, "-e", "process.exit(3)"]),
@@ -107,9 +129,9 @@ test("a signal-killed command is never reported as success", async () => {
       WRAPPER,
       process.execPath,
       "-e",
-      "process.kill(process.pid, 'SIGTERM');setTimeout(() => {}, 1000);",
+      "require('node:fs').writeSync(1, 'started');process.kill(process.pid, 'SIGTERM');setTimeout(() => {}, 1000);",
     ]),
-    (err) => err.signal === "SIGTERM" || err.code !== 0,
+    (err) => err.stdout === "started" && (err.signal === "SIGTERM" || err.code !== 0),
   );
 });
 

@@ -19,6 +19,8 @@ export const site = {
   mapsEmbed:
     "https://maps.google.com/maps?q=567%2F2%2F1%20Galle%20Road%20Wadduwa%20Sri%20Lanka&t=&z=16&ie=UTF8&iwloc=&output=embed",
   facebook: "https://www.facebook.com/SarangalakmalFitness",
+  facebookEmbed:
+    "https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FSarangalakmalFitness&tabs=timeline&width=500&height=720&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true",
   instagram: "https://www.instagram.com/smv_gym_wadduwa/",
   instagramAlt: "https://www.instagram.com/smv.gym.wadduwa/",
   instagramHandle: "@smv_gym_wadduwa",
@@ -62,6 +64,13 @@ export const programs = [
     copy: "Stage prep and off-season volume with coaching that keeps every session purposeful.",
     image: "/images/physique.jpg",
   },
+  {
+    slug: "beach-training",
+    title: "Beach training",
+    kicker: "Coast",
+    copy: "Train on Wadduwa beach. Simple, hard sessions by the sea.",
+    image: "/images/beach.jpg",
+  },
 ] as const;
 
 export const gallery = [
@@ -87,6 +96,19 @@ export const gallery = [
   { src: "/images/cricket.jpg", alt: "Community cricket", tag: "Community" },
   { src: "/images/coach.jpg", alt: "Coaching on the floor", tag: "Community" },
   { src: "/images/swim-train.jpg", alt: "Outdoor conditioning", tag: "Coast" },
+  { src: "/images/gym-2026-09-01.jpg", alt: "Seated shoulder and lateral-raise machine on the SMV gym floor", tag: "Floor" },
+  { src: "/images/gym-2026-09-02.jpg", alt: "Wide view of the training floor with benches and machines", tag: "Floor" },
+  { src: "/images/gym-2026-09-03.jpg", alt: "Treadmill row with screens for cardio sessions", tag: "Conditioning" },
+  { src: "/images/gym-2026-09-04.jpg", alt: "Heavy bag in front of the SMV Wadduwa backdrop", tag: "Conditioning" },
+  { src: "/images/gym-2026-09-05.jpg", alt: "Training floor with plate-loaded machines and benches", tag: "Floor" },
+  { src: "/images/gym-2026-09-06.jpg", alt: "Seated row station on the machine floor", tag: "Floor" },
+  { src: "/images/gym-2026-09-07.jpg", alt: "Benches and free-weight corner of the gym", tag: "Floor" },
+  { src: "/images/gym-2026-09-08.jpg", alt: "Leg press machine loaded for leg day", tag: "Strength" },
+  { src: "/images/gym-2026-09-09.jpg", alt: "Chest fly machine with weight stack", tag: "Floor" },
+  { src: "/images/gym-2026-09-10.jpg", alt: "Posterior-chain bench for glute and hamstring work", tag: "Strength" },
+  { src: "/images/gym-2026-09-11.jpg", alt: "Plate-loaded lever machines along the strength wall", tag: "Strength" },
+  { src: "/images/gym-2026-09-12.jpg", alt: "Plate-loaded row stations ready for training", tag: "Strength" },
+  { src: "/images/gym-2026-09-13.jpg", alt: "Workout bench beside the treadmill row", tag: "Floor" },
 ] as const;
 
 export const events = [

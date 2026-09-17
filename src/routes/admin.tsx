@@ -1,20 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Eye, History, KeyRound, LockKeyhole, Save, Server, Sparkles } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { getDbSource } from "@/lib/get-db-source";
+import { defaultSiteContent, refreshSiteContent, type SiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
   head: () => ({ meta: [{ title: "SMV GYM Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
 });
 
-type Content = { headline: string; intro: string; font: string; accent: string };
+type Content = Pick<SiteContent, "headline" | "intro" | "font" | "accent">;
 type Version = Content & { id: string; label: string; createdAt: string };
-const defaults: Content = {
-  headline: "Train strong. Feel good.",
-  intro: "A friendly gym in Wadduwa for strength, fitness and bodybuilding.",
-  font: "Manrope",
-  accent: "#c45c32",
-};
+const defaults: Content = defaultSiteContent;
+
+/** Backend-specific wording: never claim Neon when the preview fallback is active. */
+const storageLabels = {
+  neon: { save: "Save to Neon", saved: "Saved to Neon." },
+  pglite: { save: "Save content", saved: "Saved (preview storage — set DATABASE_URL to save to Neon)." },
+} as const;
 
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -32,17 +35,20 @@ function AdminPage() {
   const [content, setContent] = useState<Content>(defaults);
   const [versions, setVersions] = useState<Version[]>([]);
   const [notice, setNotice] = useState("");
+  const [storage, setStorage] = useState<keyof typeof storageLabels>("pglite");
 
   async function load() {
     const session = await json<{ authenticated: boolean }>("/api/admin/session");
     setUnlocked(session.authenticated);
     if (!session.authenticated) return;
-    const [nextContent, nextVersions] = await Promise.all([
+    const [nextContent, nextVersions, nextStorage] = await Promise.all([
       json<Content>("/api/admin/content"),
       json<Version[]>("/api/admin/versions"),
+      getDbSource(),
     ]);
     setContent(nextContent);
     setVersions(nextVersions);
+    setStorage(nextStorage);
   }
 
   useEffect(() => {
@@ -53,6 +59,8 @@ function AdminPage() {
     e.preventDefault();
     try {
       await json("/api/admin/login", { method: "POST", body: JSON.stringify({ password }) });
+      setPassword("");
+      setNotice("");
       await load();
     } catch {
       setNotice("Password is not correct.");
@@ -64,10 +72,17 @@ function AdminPage() {
       setContent(
         await json<Content>("/api/admin/content", {
           method: "POST",
-          body: JSON.stringify(content),
+          // GET includes managed collections; never send them back from this scalar form.
+          body: JSON.stringify({
+            headline: content.headline,
+            intro: content.intro,
+            font: content.font,
+            accent: content.accent,
+          }),
         }),
       );
-      setNotice("Saved to Neon.");
+      await refreshSiteContent();
+      setNotice(storageLabels[storage].saved);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not save.");
     }
@@ -94,6 +109,7 @@ function AdminPage() {
           body: JSON.stringify({ id: versionToRestore.id }),
         }),
       );
+      await refreshSiteContent();
       setNotice(`Restored ${versionToRestore.label}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not restore version.");
@@ -112,6 +128,7 @@ function AdminPage() {
         credentials: "same-origin",
       });
       if (!response.ok) throw new Error(await response.text());
+      await refreshSiteContent();
       setNotice("Logo uploaded to Vercel Blob.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not upload logo.");
@@ -154,7 +171,7 @@ function AdminPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-iron">SMV GYM admin</p>
             <h1 className="mt-2 font-display text-5xl uppercase">Website control</h1>
             <p className="mt-3 max-w-2xl text-muted">
-              Edit the website, save it to Neon and create a reviewable version.
+              Edit the website, save your changes and create a reviewable version.
             </p>
           </div>
           <Link to="/" className="flex items-center gap-2 text-sm text-muted no-underline">
@@ -216,7 +233,7 @@ function AdminPage() {
                 className="flex items-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white"
               >
                 <Save className="size-4" />
-                Save to Neon
+                {storageLabels[storage].save}
               </button>
               <button
                 onClick={version}
@@ -261,8 +278,9 @@ function AdminPage() {
                 <h2 className="font-display text-2xl uppercase">MCP connection</h2>
               </div>
               <p className="mt-3 text-sm text-muted">
-                Use your domain URL with an MCP client. It will ask for the same admin password used
-                here.
+                Use your domain URL with an MCP client. Configure HTTP Basic credentials in the
+                connector using the same admin password as here. An automatic password dialog is
+                not guaranteed; clients that cannot send Basic credentials cannot connect.
               </p>
               <code className="mt-4 block overflow-x-auto rounded bg-bg p-3 text-xs text-fg">
                 https://your-domain.com/api/mcp
@@ -273,7 +291,8 @@ function AdminPage() {
               </p>
               <p className="mt-3 flex gap-2 text-xs text-muted">
                 <Sparkles className="size-3 shrink-0" />
-                Tools: read content, edit content, create versions and list versions.
+                Tools: discover the site, read and edit any section or gallery item, upload
+                images, and manage versions.
               </p>
             </div>
           </aside>
