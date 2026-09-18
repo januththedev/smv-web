@@ -76,11 +76,13 @@ type Photo = {
   src: string;
   alt: string;
   tag: string;
+  type?: "photo" | "video";
+  poster?: string;
   span: number;
   frameClass: string;
 };
 
-function layoutPhotos(items: ReadonlyArray<{ src: string; alt: string; tag: string }>): Photo[] {
+function layoutPhotos(items: ReadonlyArray<{ src: string; alt: string; tag: string; type?: "photo" | "video"; poster?: string }>): Photo[] {
   const photos: Photo[] = [];
   let rowIdx = 0;
   let colIdx = 0;
@@ -271,13 +273,18 @@ function Gallery() {
                   className="absolute inset-0 block h-full w-full overflow-hidden shadow-border focus-visible:-outline-offset-4"
                 >
                   <img
-                    src={p.src}
+                    src={p.poster ?? p.src}
                     alt={p.alt}
                     loading={i < 3 ? "eager" : "lazy"}
                     decoding="async"
                     {...(i === 0 ? { fetchPriority: "high" as const } : {})}
                     className="h-full w-full object-cover"
                   />
+                  {p.type === "video" && (
+                    <span className="pointer-events-none absolute right-3 bottom-3 z-10 inline-flex items-center gap-1.5 rounded bg-bg/80 px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.18em] text-fg backdrop-blur-sm">
+                      Video
+                    </span>
+                  )}
                 </button>
               </div>
               <figcaption className="mt-3 flex items-baseline justify-between gap-4">
@@ -331,12 +338,24 @@ function Gallery() {
 
             {current ? (
               <figure className="flex max-h-full flex-col items-center gap-4">
-                <img
-                  key={current.src}
-                  src={current.src}
-                  alt={current.alt}
-                  className="max-h-[74dvh] w-auto max-w-full rounded-lg object-contain shadow-border"
-                />
+                {current.type === "video" ? (
+                  <video
+                    key={current.src}
+                    src={current.src}
+                    poster={current.poster}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="max-h-[74dvh] w-auto max-w-full rounded-lg shadow-border"
+                  />
+                ) : (
+                  <img
+                    key={current.src}
+                    src={current.src}
+                    alt={current.alt}
+                    className="max-h-[74dvh] w-auto max-w-full rounded-lg object-contain shadow-border"
+                  />
+                )}
                 <figcaption className="flex w-full max-w-3xl flex-wrap items-baseline justify-between gap-2 px-1 text-xs uppercase tracking-[0.2em] text-muted">
                   <span>
                     <span className="font-display text-base tracking-[0.08em] text-iron">

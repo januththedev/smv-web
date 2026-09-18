@@ -1,18 +1,22 @@
 import { defineEventHandler, readBody } from "h3";
-import { createSiteVersion, listSiteVersions, restoreSiteVersion } from "../../../src/lib/site-content.server";
+import { createSiteVersion, listSiteVersions, restoreSiteVersion, revisionOf } from "../../../src/lib/site-content.server";
 import { isAdminRequest } from "../../utils/admin-auth";
 
+const jsonWithEtag = (content: unknown) => Response.json(content, { headers: { etag: `"${revisionOf(content as Parameters<typeof revisionOf>[0])}"`, "cache-control": "no-store" } });
+
 export default defineEventHandler(async (event) => {
-  if (!(await isAdminRequest(event.req as Request))) return new Response("Unauthorized", { status: 401 });
-  if (event.req.method === "GET") return listSiteVersions();
-  if (event.req.method === "POST") {
+  const request = event.req as Request;
+  if (!(await isAdminRequest(request))) return new Response("Unauthorized", { status: 401 });
+  if (request.method === "GET") return listSiteVersions();
+  if (request.method === "POST") {
     const body = await readBody<{ label?: string }>(event);
     return createSiteVersion(body?.label ?? "Content update");
   }
-  if (event.req.method === "PUT") {
+  if (request.method === "PUT") {
     const body = await readBody<{ id?: string }>(event);
     if (!body?.id) return new Response("Version id is required", { status: 400 });
-    return restoreSiteVersion(body.id);
+    const content = await restoreSiteVersion(body.id, request.headers.get("if-match")?.replace(/^"|"$/g, ""));
+    return jsonWithEtag(content);
   }
   return new Response("Method Not Allowed", { status: 405 });
 });

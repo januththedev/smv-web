@@ -2,7 +2,8 @@ import * as z from "zod";
 import { events, gallery, programs, quotes } from "@/lib/site";
 import { copyDefaults } from "@/lib/site-copy";
 
-export type GalleryPhoto = { src: string; alt: string; tag: string };
+export type GalleryMedia = "photo" | "video";
+export type GalleryPhoto = { src: string; alt: string; tag: string; type?: GalleryMedia; poster?: string };
 export type ProgramItem = { slug: string; title: string; kicker: string; copy: string; image: string };
 export type EventItem = { slug: string; kicker: string; title: string; copy: string; image: string; when: string };
 export type QuoteItem = { quote: string; name: string };
@@ -48,7 +49,10 @@ export const itemSchemas = {
   programs: z.strictObject({ slug, title: text(), kicker: text(), copy: text(800), image: imageUrlSchema }),
   events: z.strictObject({ slug, title: text(), kicker: text(), copy: text(800), image: imageUrlSchema, when: text() }),
   quotes: z.strictObject({ quote: text(800), name: text() }),
-  gallery: z.strictObject({ src: imageUrlSchema, alt: text(), tag: text() }),
+  gallery: z.strictObject({
+    src: imageUrlSchema, alt: text(), tag: text(),
+    type: z.enum(["photo", "video"]).optional(), poster: imageUrlSchema.optional(),
+  }),
 };
 export function itemFields(collection: SectionsCollectionKey): readonly string[] { return Object.keys(itemSchemas[collection].shape); }
 export const sectionKeySchema = z.string().max(160).refine(hasSectionKey, "Unknown/non-rendered section key; consult discover_site");
@@ -65,6 +69,8 @@ export const contentPatchSchema = contentSchema.partial();
 export const adminScalarPatchSchema = z.strictObject({
   headline: scalarShape.headline.optional(), intro: scalarShape.intro.optional(),
   font: scalarShape.font.optional(), accent: scalarShape.accent.optional(),
+  /** Rendered section-copy overrides, edited inline in the admin UI. */
+  sections: sectionsSchema.optional(),
 });
 
 /** Read compatibility only. Never use this forgiving normalizer to validate writes. */
@@ -87,8 +93,17 @@ export function cleanContent(value: unknown): SiteContent {
     for (const row of raw[collection].slice(0, maxItems[collection])) {
       if (!row || typeof row !== "object" || Array.isArray(row)) continue;
       // Legacy missing text fields become empty, not unrelated default item copy.
+      // Optional fields (gallery type/poster) stay absent unless meaningfully present.
       const candidate: Record<string, unknown> = {};
-      for (const field of itemFields(collection)) candidate[field] = (row as Record<string, unknown>)[field] ?? "";
+      for (const field of itemFields(collection)) {
+        const value = (row as Record<string, unknown>)[field];
+        const fieldSchema: { safeParse: (value: unknown) => { success: boolean } } = itemSchemas[collection].shape[field as never];
+        if (fieldSchema.safeParse(undefined).success) {
+          if (typeof value === "string" && value) candidate[field] = value;
+        } else {
+          candidate[field] = value ?? "";
+        }
+      }
       const parsed = itemSchemas[collection].safeParse(candidate);
       if (parsed.success) rows.push(parsed.data);
     }

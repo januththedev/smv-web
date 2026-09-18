@@ -360,7 +360,7 @@ function Home() {
             gallery.slice(0, 4).map((photo, i) => (
               <img
                 key={`${photo.src}-${i}`}
-                src={photo.src}
+                src={photo.poster ?? photo.src}
                 alt={photo.alt}
                 loading="lazy"
                 className={cn(

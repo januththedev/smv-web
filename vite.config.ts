@@ -155,6 +155,8 @@ function serverApiBridgePlugin(): Plugin {
     ["/api/mcp", "/server/api/mcp.ts"],
     ["/api/admin/content", "/server/api/admin/content.ts"],
     ["/api/admin/upload", "/server/api/admin/upload.post.ts", "POST"],
+    ["/api/admin/item", "/server/api/admin/item.post.ts", "POST"],
+    ["/api/admin/media-token", "/server/api/admin/media-token.post.ts", "POST"],
     ["/api/admin/versions", "/server/api/admin/versions.ts"],
     ["/api/admin/login", "/server/api/admin/login.post.ts", "POST"],
     ["/api/admin/session", "/server/api/admin/session.get.ts", "GET"],

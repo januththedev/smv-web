@@ -34,7 +34,13 @@ export function checkedUrl(url) {
 export function checkedOutputPath(target, allowedDirs, label = "screenshot") {
   // Resolve first so `..` cannot slip past the prefix check.
   const abs = resolve(target);
-  const allowed = allowedDirs.some((dir) => abs.startsWith(dir.endsWith(sep) ? dir : dir + sep));
+  let allowed = allowedDirs.some((dir) => abs.startsWith(dir.endsWith(sep) ? dir : dir + sep));
+  // A literal "/workspace" cannot exist on Windows checkouts; keep the same
+  // containment guarantee by also allowing the project's own screenshots dir.
+  if (!allowed && typeof process !== "undefined" && process.env.SMOKESCREEN_ALLOWED_ROOT) {
+    const root = resolve(process.env.SMOKESCREEN_ALLOWED_ROOT);
+    allowed = abs.startsWith(root.endsWith(sep) ? root : root + sep);
+  }
   if (!allowed) {
     fail(`${label} path must be under ${allowedDirs.join(" or ")}, got ${abs}`);
   }

@@ -11,6 +11,14 @@ export type NewsPost = {
 
 export const fallbackNews: NewsPost[] = [
   {
+    id: "dansala-2026",
+    title: "Dansala with SMV GYM",
+    body: "Not every event needs a barbell. For Vesak we host a free dansala on Galle Road — everyone is welcome, members or not.",
+    when: "Vesak · Wadduwa",
+    image: "/images/group.jpg",
+    href: site.facebook,
+  },
+  {
     id: "cricket-2026",
     title: "SMV GYM Cricket Tournament 2026",
     body: "The gym hits the pitch. A cricket day for members and friends — come play or come cheer.",
