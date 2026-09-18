@@ -36,10 +36,7 @@ export const copyDefaults = {
     "The weight. The work. The people. From the first set to the Wadduwa coast, a closer look at life inside SMV GYM.",
   "gallery.hero.cta": "Open a frame. Step inside.",
 
-  /* Events — managed updates are distinct from the Facebook feed below */
-  "events.managed.title": "Gym updates",
-  "events.managed.body":
-    "Dates and announcements we publish ourselves, kept current by the SMV team.",
+  /* Events — the News page shows the Facebook feed; managed events render on Home */
   "events.hero.title": "From the SMV page.",
   "events.hero.lede":
     "Updates gathered from our Facebook page and the gym floor — competitions, beach sessions and daily life in Wadduwa.",

@@ -42,11 +42,16 @@ Never dump the whole site: there is no "read everything" tool by design.
 
 - **Scalars:** `headline`, `intro`, `font` (Manrope / Arial / Georgia /
   Trebuchet MS), `accent`, `logoUrl`.
-- **Sections:** all 31 catalogued text keys (hero titles, about copy, visit
+- **Sections:** all 29 catalogued text keys (hero titles, about copy, visit
   info, page heroes, etc.) — `discover_site` lists them exactly.
 - **Collections:** `programs`, `events`, `quotes`, `gallery` — add, patch,
   remove. Removing an item (including the last gallery photo) removes its
   reference from the site; the underlying image file is never deleted.
+- **Where edits appear:** the `events` collection renders on the Home page
+  ("From the journal" band). The News page (`/events`) shows the Facebook
+  feed only. The map pin and "Open directions" link are code
+  (`src/lib/site.ts` `mapsUrl`/`mapsEmbed`), not MCP content — changing the
+  gym location needs a git commit/push/deploy, not an MCP edit.
 
 Empty strings and empty arrays are **intentional removals**: clearing a
 section's text or removing an item does not restore defaults. Passing a
