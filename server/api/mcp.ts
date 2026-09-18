@@ -8,7 +8,7 @@ import {
 } from "../../src/lib/site-content-schema";
 import { copyDefaults, type CopyKey } from "../../src/lib/site-copy";
 import { contentService, revisionOf, revisionSchema, type ContentService, type SiteVersion } from "../../src/lib/site-content.server";
-import { basicAdminPassword, verifyAdminPassword } from "../utils/admin-auth";
+import { extractAdminSecret, verifyAdminPassword } from "../utils/admin-auth";
 import { decodeImageBase64, uploadImage, imageMimeTypes, MAX_BASE64_LENGTH, readBoundedBody } from "../utils/admin-image";
 
 const result = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }] });
@@ -81,18 +81,35 @@ export function createMcpServer(service: ContentService = contentService, upload
   return server;
 }
 
+/** Browser-based AI clients preflight with OPTIONS (no credentials); answer it openly. */
+function corsHeaders(request: Request): Record<string, string> {
+  const origin = request.headers.get("origin");
+  return {
+    "access-control-allow-origin": origin ?? "*",
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-headers": "authorization, content-type, accept, mcp-session-id, mcp-protocol-version",
+    "access-control-expose-headers": "mcp-session-id, www-authenticate",
+    "access-control-max-age": "86400",
+    vary: "origin",
+  };
+}
+
 /** Basic password validation precedes body parsing, discovery, tool reads, and any service construction. */
 export async function handleMcpRequest(request: Request, factory: () => McpServer = () => createMcpServer()): Promise<Response> {
-  const password = basicAdminPassword(request);
+  const cors = corsHeaders(request);
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+  // Accept Basic, Bearer, or the raw pasted secret — Claude's connector dialog
+  // sends the header value literally, so most setups arrive as Bearer or bare.
+  const password = extractAdminSecret(request);
   if (!password || !verifyAdminPassword(password)) return new Response("Admin password required", {
-    status: 401, headers: { "www-authenticate": 'Basic realm="SMV Admin MCP", charset="UTF-8"', "cache-control": "no-store" },
+    status: 401, headers: { ...cors, "www-authenticate": 'Basic realm="SMV Admin MCP", charset="UTF-8"', "cache-control": "no-store" },
   });
-  if (request.method !== "POST") return new Response("Use stateless MCP POST", { status: 405, headers: { allow: "POST" } });
+  if (request.method !== "POST") return new Response("Use stateless MCP POST", { status: 405, headers: { ...cors, allow: "POST" } });
   let parsedBody: unknown;
   try {
     const body = await readBoundedBody(request, MAX_BASE64_LENGTH + 64 * 1024);
     parsedBody = JSON.parse(new TextDecoder().decode(body));
-  } catch { return new Response("Invalid or oversized JSON request", { status: 400 }); }
+  } catch { return new Response("Invalid or oversized JSON request", { status: 400, headers: cors }); }
   const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true, sessionIdGenerator: undefined });
   const server = factory();
   try {
@@ -101,6 +118,7 @@ export async function handleMcpRequest(request: Request, factory: () => McpServe
     // Buffer JSON before closing the per-request stateless transport.
     const body = await response.arrayBuffer();
     const headers = new Headers(response.headers);
+    for (const [key, value] of Object.entries(cors)) headers.set(key, value);
     headers.set("cache-control", "no-store");
     return new Response(body.byteLength ? body : null, { status: response.status, headers });
   } finally { await server.close(); }

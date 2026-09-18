@@ -692,16 +692,18 @@ function AdminPage() {
             {drawer.kind === "mcp" && (
               <div className="mt-6 space-y-4 text-sm text-muted">
                 <p>
-                  Use your domain URL with an MCP client. Configure HTTP Basic credentials in the
-                  connector using the same admin password as here. An automatic password dialog is
-                  not guaranteed; clients that cannot send Basic credentials cannot connect.
+                  Use your domain URL with an MCP client. Send the admin password as an
+                  <code className="text-fg">Authorization</code> header —{" "}
+                  <code className="text-fg">Bearer &lt;password&gt;</code> works, as do HTTP Basic
+                  or the bare password. An automatic password dialog is
+                  not guaranteed; clients that cannot send the header cannot connect.
                 </p>
                 <code className="block overflow-x-auto rounded bg-surface p-3 text-xs text-fg">
                   https://your-domain.com/api/mcp
                 </code>
                 <p className="flex gap-2 text-xs">
                   <KeyRound className="size-3 shrink-0" />
-                  HTTP Basic authentication. Any username is accepted; use your admin password.
+                  Shared secret, not per-user. Any username is accepted; use your admin password as a Bearer token.
                 </p>
                 <p className="flex gap-2 text-xs">
                   <Sparkles className="size-3 shrink-0" />

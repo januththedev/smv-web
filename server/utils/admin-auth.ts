@@ -56,4 +56,33 @@ export function basicAdminPassword(request: Request): string | undefined {
   }
 }
 
+/**
+ * Shared-secret extraction for MCP clients. Claude's custom-connector dialog
+ * takes a literal header value, so most people paste the raw password or
+ * `Bearer <password>` — not a base64 Basic pair. Accept, in order:
+ *   1. `Basic base64(user:password)` (classic HTTP Basic)
+ *   2. `Basic base64(password)` (no username part — treat all of it as the secret)
+ *   3. `Bearer <secret>` (Claude/Claude Code/API-key style)
+ *   4. a bare `<secret>` value (exactly what the user pasted, no scheme)
+ * The result is only a *candidate* — callers must still pass it through
+ * verifyAdminPassword. Same single secret, same strength, whatever the client.
+ */
+export function extractAdminSecret(request: Request): string | undefined {
+  const value = (request.headers.get("authorization") ?? "").trim();
+  if (!value) return undefined;
+  const basic = /^basic\s+(.+)$/i.exec(value);
+  if (basic) {
+    try {
+      const decoded = Buffer.from(basic[1].trim(), "base64").toString("utf8");
+      const separator = decoded.indexOf(":");
+      return separator === -1 ? decoded || undefined : decoded.slice(separator + 1) || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  const bearer = /^bearer\s+(.+)$/i.exec(value);
+  if (bearer) return bearer[1].trim() || undefined;
+  return value || undefined;
+}
+
 export const adminCookieName = COOKIE_NAME;

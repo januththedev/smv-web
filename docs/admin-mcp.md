@@ -8,15 +8,28 @@ photos on your behalf.
 
 - **URL:** `https://<your-deployment>/api/mcp` (local dev: `http://localhost:8080/api/mcp`)
 - **Transport:** MCP Streamable HTTP, stateless, JSON responses.
-- **Auth:** HTTP Basic. The username is ignored; the password must equal the
-  `ADMIN_PASSWORD` environment variable configured on the server.
+- **Auth:** one shared secret — the `ADMIN_PASSWORD` environment variable.
+  Send it in any of these `Authorization` header forms (all equivalent):
+  `Bearer <password>` (recommended), `Basic base64(user:<password>)`, or the
+  bare password with no scheme. Wrong or missing credentials get HTTP 401.
 
 Configure the credentials **in the connector's own settings** (header
 configuration, environment, or secrets store). Do not put the password in chat
 or in tool arguments. An automatic password popup is client-dependent: some
 MCP clients prompt for Basic credentials on connect, others require you to
 preconfigure headers or cannot send them at all. If the client cannot send
-HTTP Basic, it cannot connect — there is no fallback.
+an `Authorization` header, it cannot connect — there is no fallback.
+
+### Claude (claude.ai custom connector)
+
+1. Settings → Connectors → Add custom connector.
+2. URL: `https://smv-web.vercel.app/api/mcp` (or your deployment URL).
+3. Authentication: No sign-in + Request headers → add header
+   `Authorization` with value `Bearer <ADMIN_PASSWORD>`
+   (replace `<ADMIN_PASSWORD>` with the real Vercel env value).
+4. Click Add, then Connect. If Connect fails with an authorization error,
+   re-check the header value — Claude sends it literally, including the
+   `Bearer ` prefix and space.
 
 The admin web UI (`/admin`) uses a separate cookie session with the same
 password; MCP always uses Basic auth.
