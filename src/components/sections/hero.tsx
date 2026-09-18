@@ -66,7 +66,7 @@ export function Hero() {
             className="hero-photo-image"
           />
           <div className="hero-photo-shade" aria-hidden="true" />
-          <img className="hero-seal" src={content.logoUrl} alt="SMV GYM Wadduwa" />
+          <img className="hero-seal" src={content.logoUrl} alt="SMV GYM Wadduwa" data-admin-image="logo" />
           <figcaption className="hero-photo-caption">
             <span>THE WORK<br />STARTS HERE.</span>
             <span>SMV GYM<br />WADDUWA, LK</span>

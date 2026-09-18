@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { put } from "@vercel/blob/client";
 import { Check, Eye, History, ImagePlus, KeyRound, LockKeyhole, Pencil, Plus, Save, Server, Sparkles, Trash2, X } from "lucide-react";
-import { useEffect, useState, type ChangeEvent, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type MouseEvent } from "react";
 import { Home } from "@/routes/index";
 import { getDbSource } from "@/lib/get-db-source";
 import { copyDefaults, type CopyKey } from "@/lib/site-copy";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/admin")({
 type Version = { id: string; label: string; createdAt: string };
 type Draft = Record<string, string>;
 type Editing = { collection: SectionsCollectionKey; index: number; isNew: boolean; draft: Draft };
+type PendingImage = { collection: SectionsCollectionKey; index: number; field: string };
 type ScalarField = "headline" | "intro" | "font" | "accent";
 type Drawer = { kind: "section"; id: string } | { kind: "style" } | { kind: "versions" } | { kind: "mcp" } | null;
 
@@ -185,6 +186,10 @@ function AdminPage() {
   const [scalarDraft, setScalarDraft] = useState({ headline: "", intro: "", font: "", accent: "" });
   const [editing, setEditing] = useState<Editing | null>(null);
   const [uploading, setUploading] = useState("");
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imagePickerRef = useRef<HTMLInputElement>(null);
+  const logoPickerRef = useRef<HTMLInputElement>(null);
 
   const effectiveCopy = (key: CopyKey) => content.sections[key] ?? copyDefaults[key];
 
@@ -220,6 +225,31 @@ function AdminPage() {
       return;
     }
     setNotice(error instanceof Error ? error.message : fallback);
+  }
+
+  /** Server upload failures arrive as raw JSON text — translate to plain words. */
+  function friendlyUploadError(error: unknown): string {
+    const raw = error instanceof Error ? error.message : "";
+    try {
+      const parsed = JSON.parse(raw) as { error?: unknown };
+      if (typeof parsed?.error === "string") {
+        if (/storage is not configured|storage is unavailable/i.test(parsed.error)) {
+          return "Photo storage isn't connected yet (missing BLOB_READ_WRITE_TOKEN in Vercel). Text edits still save — ask Januth to connect storage for photo uploads.";
+        }
+        return parsed.error;
+      }
+    } catch {
+      /* not JSON — fall through to raw text */
+    }
+    if (/storage|unavailable|503/i.test(raw)) {
+      return "Photo storage isn't reachable right now. Text edits still save — try the photo again later.";
+    }
+    return raw || "Could not upload the photo.";
+  }
+
+  function reportUploadError(error: unknown, fallback: string) {
+    if (error instanceof Error && /Stale revision/.test(error.message)) handleError(error, fallback);
+    else setNotice(friendlyUploadError(error));
   }
 
   async function login(e: FormEvent) {
@@ -333,12 +363,19 @@ function AdminPage() {
     }
   }
 
-  async function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function uploadLogoFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setNotice("Pick a photo file for the logo (JPEG, PNG, WebP or GIF).");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setNotice("Logo photos must be under 4 MB.");
+      return;
+    }
     const form = new FormData();
     form.append("file", file);
     try {
+      setNotice("Uploading logo…");
       const response = await fetch("/api/admin/upload", {
         method: "POST",
         body: form,
@@ -348,7 +385,74 @@ function AdminPage() {
       await load();
       setNotice("Logo uploaded to Vercel Blob.");
     } catch (error) {
-      handleError(error, "Could not upload logo.");
+      reportUploadError(error, "Could not upload logo.");
+    }
+  }
+
+  async function uploadLogo(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await uploadLogoFile(file);
+    event.target.value = "";
+  }
+
+  /** Click-a-photo flow: open the device picker for one collection image. */
+  function triggerItemImagePicker(collection: SectionsCollectionKey, index: number, field: string) {
+    if (uploadingImage) return;
+    const row = (content[collection] as unknown as Draft[])[index];
+    if (!row) return;
+    const videoSlot = collection === "gallery" && field === "src" && row.type === "video";
+    if (imagePickerRef.current) {
+      imagePickerRef.current.accept = videoSlot ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*";
+    }
+    setPendingImage({ collection, index, field });
+    imagePickerRef.current?.click();
+  }
+
+  /** Device file chosen for a collection image — upload, patch, refresh. No URLs typed. */
+  async function handleItemImageFile(file: File) {
+    if (!pendingImage) return;
+    const { collection, index, field } = pendingImage;
+    const row = (content[collection] as unknown as Draft[])[index];
+    if (!row) {
+      setPendingImage(null);
+      return;
+    }
+    const videoSlot = collection === "gallery" && field === "src" && row.type === "video";
+    const pickedVideo = file.type.startsWith("video/");
+    if (videoSlot && !pickedVideo) {
+      setNotice("This slot plays a video — pick a video file, or open the editor to switch Kind to Photo.");
+      setPendingImage(null);
+      return;
+    }
+    if (!videoSlot && !file.type.startsWith("image/")) {
+      setNotice("Pick a photo file (JPEG, PNG, WebP or GIF).");
+      setPendingImage(null);
+      return;
+    }
+    const limit = pickedVideo ? 120 * 1024 * 1024 : 4 * 1024 * 1024;
+    if (file.size > limit) {
+      setNotice(pickedVideo ? "Videos must be under 120 MB." : "Photos must be under 4 MB.");
+      setPendingImage(null);
+      return;
+    }
+    setUploadingImage(true);
+    setNotice(pickedVideo ? "Uploading video…" : "Uploading photo…");
+    try {
+      const url = await uploadMedia(file, pickedVideo ? "video" : "photo");
+      const saved = await json<{ content: SiteContent; revision: string }>("/api/admin/item", {
+        method: "POST",
+        body: JSON.stringify({ collection, action: "patch", index, patch: { [field]: url }, expectedRevision: revision }),
+      });
+      applyContent(saved.data.content, saved.data.revision);
+      await refreshSiteContent();
+      setNotice(pickedVideo ? "Video updated — live on the site." : "Photo updated — live on the site.");
+    } catch (error) {
+      reportUploadError(error, "Could not save the photo.");
+    } finally {
+      setPendingImage(null);
+      setUploadingImage(false);
+      if (imagePickerRef.current) imagePickerRef.current.value = "";
     }
   }
 
@@ -378,7 +482,7 @@ function AdminPage() {
       setUploading("");
     } catch (error) {
       setUploading("");
-      handleError(error, "Could not upload the file.");
+      reportUploadError(error, "Could not upload the file.");
     }
   }
 
@@ -435,6 +539,26 @@ function AdminPage() {
     const closest = target?.closest?.bind(target);
     if (!closest) return;
     if (closest("a")) e.preventDefault();
+    if (uploadingImage) return;
+    // A photo itself: replace it straight from the device, no URLs, no forms.
+    const img = closest("[data-admin-image]");
+    if (img) {
+      const field = img.getAttribute("data-admin-image") ?? "";
+      if (field === "logo") {
+        logoPickerRef.current?.click();
+        return;
+      }
+      const itemEl = img.closest("[data-admin-collection]");
+      if (itemEl && field) {
+        const collection = itemEl.getAttribute("data-admin-collection") ?? "";
+        const index = Number(itemEl.getAttribute("data-admin-index"));
+        if (isSectionsCollectionKey(collection) && Number.isInteger(index)) {
+          triggerItemImagePicker(collection, index, field);
+          return;
+        }
+      }
+      return;
+    }
     const item = closest("[data-admin-collection]");
     if (item) {
       const collection = item.getAttribute("data-admin-collection") ?? "";
@@ -486,6 +610,8 @@ function AdminPage() {
         .admin-preview [data-admin-section]:hover { outline: 2px dashed var(--color-iron); outline-offset: 6px; }
         .admin-preview [data-admin-collection] { cursor: pointer; }
         .admin-preview [data-admin-collection]:hover { outline: 2px dashed var(--color-iron); outline-offset: 4px; }
+        .admin-preview [data-admin-image] { cursor: pointer; }
+        .admin-preview [data-admin-image]:hover { outline: 3px solid var(--color-iron); outline-offset: 2px; }
       `}</style>
 
       {/* Sticky control bar */}
@@ -511,16 +637,41 @@ function AdminPage() {
         </div>
         <div className="border-t border-line">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 px-5 py-2 text-xs text-muted md:px-8">
-            <span className="flex items-center gap-1.5">
-              <Pencil className="size-3.5 text-iron" />
-              Click any part of the site below to edit it — preview links are disabled.
-            </span>
+              <span className="flex items-center gap-1.5">
+                <Pencil className="size-3.5 text-iron" />
+                Click any part of the site below to edit it. Click a photo to replace it straight from your device — preview links are disabled.
+              </span>
             {notice && <span className="text-fg">{notice}</span>}
           </div>
         </div>
       </div>
 
       {/* Live site preview — the real homepage, click any block to edit */}
+      {/* Hidden device pickers: photo clicks open these, never a URL field. */}
+      <input
+        ref={imagePickerRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleItemImageFile(file);
+        }}
+      />
+      <input
+        ref={logoPickerRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void uploadLogoFile(file);
+        }}
+      />
       <div className="admin-preview" onClickCapture={handlePreviewClick}>
         <Home />
       </div>
@@ -764,18 +915,18 @@ function AdminPage() {
                     {field === "type" && editing.draft.type === "video" && editing.draft.src ? (
                       <video src={editing.draft.src} className="mt-2 h-20 rounded bg-black" muted />
                     ) : null}
-                    {photoFields.has(field) ? (
-                      <span className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-4 py-3 text-xs">
-                        <ImagePlus className="size-4" />
-                        Upload {field === "poster" ? "poster image" : field === "src" ? "photo or video" : "image"}
-                        <input
-                          type="file"
-                          accept={field === "src" ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*"}
-                          onChange={(e) => void handleMediaPick(e, field as "src" | "image" | "poster")}
-                          className="sr-only"
-                        />
-                      </span>
-                    ) : null}
+                          {photoFields.has(field) ? (
+                            <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-4 py-3 text-xs">
+                              <ImagePlus className="size-4" />
+                              Upload {field === "poster" ? "poster image" : field === "src" ? "photo or video" : "image"}
+                              <input
+                                type="file"
+                                accept={field === "src" ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*"}
+                                onChange={(e) => void handleMediaPick(e, field as "src" | "image" | "poster")}
+                                className="sr-only"
+                              />
+                            </label>
+                          ) : null}
                   </label>
                 ))}
               </div>

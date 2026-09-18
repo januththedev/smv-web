@@ -203,6 +203,7 @@ export function Home() {
                       src={p.image}
                       alt={p.title}
                       loading="lazy"
+                      data-admin-image="image"
                       className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
                     />
                   </div>
@@ -304,6 +305,7 @@ export function Home() {
                     src={ev.image}
                     alt=""
                     loading="lazy"
+                    data-admin-image="image"
                     className="aspect-[4/3] w-full object-cover md:aspect-square"
                   />
                 </div>
@@ -369,6 +371,7 @@ export function Home() {
                 loading="lazy"
                 data-admin-collection="gallery"
                 data-admin-index={i}
+                data-admin-image={photo.type === "video" ? "poster" : "src"}
                 className={cn(
                   "aspect-[3/4] w-full object-cover",
                   i % 2 === 1 && "md:mt-10",
