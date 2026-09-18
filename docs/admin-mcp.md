@@ -42,8 +42,8 @@ Never dump the whole site: there is no "read everything" tool by design.
 
 - **Scalars:** `headline`, `intro`, `font` (Manrope / Arial / Georgia /
   Trebuchet MS), `accent`, `logoUrl`.
-- **Sections:** all 29 catalogued text keys (hero titles, about copy, visit
-  info, page heroes, etc.) — `discover_site` lists them exactly.
+- **Sections:** all 35 catalogued text keys (hero titles, about copy, visit
+  info, community stats, page heroes, etc.) — `discover_site` lists them exactly.
 - **Collections:** `programs`, `events`, `quotes`, `gallery` — add, patch,
   remove. Removing an item (including the last gallery photo) removes its
   reference from the site; the underlying image file is never deleted.

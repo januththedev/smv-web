@@ -25,7 +25,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section ref={root} className="editorial-hero" aria-labelledby="hero-title">
+    <section ref={root} className="editorial-hero" aria-labelledby="hero-title" data-admin-section="hero">
       <div className="hero-edition" data-hero>
         <span>{copy("home.hero.kicker")}</span>
         <span>{site.city} · {site.country}</span>

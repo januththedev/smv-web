@@ -60,7 +60,7 @@ function SectionHead({
   );
 }
 
-function Home() {
+export function Home() {
   const mainRef = useRef<HTMLElement>(null);
   const content = useSiteContent();
   const copy = useSiteCopy();
@@ -140,7 +140,7 @@ function Home() {
       <VelocityMarquee />
 
       {/* 01 — Introduction: ruled editorial two-column */}
-      <section className="mx-auto max-w-6xl px-5 pt-20 md:px-8 md:pt-28">
+      <section data-admin-section="about" className="mx-auto max-w-6xl px-5 pt-20 md:px-8 md:pt-28">
         <SectionHead index="01" title={copy("home.about.title")} />
         <div className="grid gap-10 pt-10 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4">
@@ -174,7 +174,7 @@ function Home() {
       </section>
 
       {/* 02 — Programs: asymmetric 2-column editorial photo cards */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
+      <section data-admin-section="programs" className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
         <SectionHead index="02" title={copy("home.programs.title")} />
         <div className="grid gap-x-4 gap-y-14 pt-10 sm:grid-cols-2 md:gap-y-20">
           {programs.map((p, i) => {
@@ -183,6 +183,8 @@ function Home() {
             return (
               <article
                 key={`${p.slug}-${i}`}
+                data-admin-collection="programs"
+                data-admin-index={i}
                 className={
                   a
                     ? "sm:col-span-1"
@@ -229,7 +231,7 @@ function Home() {
       </section>
 
       {/* Interlude — inverted editorial band: the coast */}
-      <section className="mt-24 bg-fg text-bg md:mt-32">
+      <section data-admin-section="beach" className="mt-24 bg-fg text-bg md:mt-32">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-12 md:px-8 md:py-24">
           <div className="md:col-span-7">
             <p className="text-xs uppercase tracking-[0.24em] opacity-60">
@@ -258,15 +260,15 @@ function Home() {
       </section>
 
       {/* 03 — Community: ruled stat ledger, real Facebook numbers */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
+      <section data-admin-section="community" className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
         <SectionHead index="03" title="The community" />
         <ul className="grid grid-cols-1 divide-y divide-line border-x border-b border-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {[
-            { n: site.community.likes, l: "Likes on Facebook" },
-            { n: site.community.checkins, l: "Facebook check-ins" },
-            { n: site.community.recommend, l: "Would recommend" },
-          ].map((s) => (
-            <li key={s.l} className="px-6 py-10">
+            { n: copy("home.community.likes"), l: copy("home.community.likesLabel") },
+            { n: copy("home.community.checkins"), l: copy("home.community.checkinsLabel") },
+            { n: copy("home.community.recommend"), l: copy("home.community.recommendLabel") },
+          ].map((s, i) => (
+            <li key={`stat-${i}`} className="px-6 py-10">
               <p className="font-display text-5xl font-semibold tracking-tight tabular-nums md:text-6xl">
                 <span className="sr-only">{s.n}</span>
                 <span aria-hidden="true" className="inline-grid">
@@ -281,7 +283,7 @@ function Home() {
       </section>
 
       {/* 04 — Journal: editorial ruled rows, not a calendar */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
+      <section data-admin-section="events" className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
         <SectionHead
           index="04"
           title={copy("home.events.title")}
@@ -289,7 +291,7 @@ function Home() {
         />
         <div className="divide-y divide-line">
           {events.map((ev, i) => (
-            <article key={`${ev.slug}-${i}`} className="group">
+            <article key={`${ev.slug}-${i}`} data-admin-collection="events" data-admin-index={i} className="group">
               <Link
                 to="/events"
                 className="grid items-center gap-5 py-7 no-underline md:grid-cols-12 md:gap-8"
@@ -326,12 +328,14 @@ function Home() {
       </section>
 
       {/* Quotes — restrained, ruled single column pair */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
+      <section data-admin-section="quotes" className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
         <SectionHead index="05" title={copy("home.quotes.title")} />
         <div className="grid gap-x-8 pt-10 sm:grid-cols-2">
           {quotes.map((q, i) => (
             <blockquote
               key={`${q.name}-${i}`}
+              data-admin-collection="quotes"
+              data-admin-index={i}
               className="border-t border-line py-7"
             >
               <p className="font-display text-2xl font-semibold uppercase leading-tight tracking-tight text-fg md:text-3xl">
@@ -349,7 +353,7 @@ function Home() {
       </section>
 
       {/* 06 — Gallery teaser: offset sharp photo spread */}
-      <section className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
+      <section data-admin-section="gallery" className="mx-auto max-w-6xl px-5 pt-24 md:px-8 md:pt-32">
         <SectionHead
           index="06"
           title={copy("home.gallery.title")}
@@ -363,6 +367,8 @@ function Home() {
                 src={photo.poster ?? photo.src}
                 alt={photo.alt}
                 loading="lazy"
+                data-admin-collection="gallery"
+                data-admin-index={i}
                 className={cn(
                   "aspect-[3/4] w-full object-cover",
                   i % 2 === 1 && "md:mt-10",
@@ -386,7 +392,7 @@ function Home() {
       </section>
 
       {/* 07 — Visit: strong CTA band */}
-      <section className="border-t border-line bg-surface">
+      <section data-admin-section="visit" className="border-t border-line bg-surface">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-12 md:px-8 md:py-24">
           <div className="md:col-span-7">
             <p className="text-xs uppercase tracking-[0.22em] text-iron">

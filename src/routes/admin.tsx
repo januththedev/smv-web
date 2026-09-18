@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { put } from "@vercel/blob/client";
-import { Check, Eye, History, ImagePlus, KeyRound, LockKeyhole, Plus, Save, Server, Sparkles, Trash2, X } from "lucide-react";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { Check, Eye, History, ImagePlus, KeyRound, LockKeyhole, Pencil, Plus, Save, Server, Sparkles, Trash2, X } from "lucide-react";
+import { useEffect, useState, type ChangeEvent, type FormEvent, type MouseEvent } from "react";
+import { Home } from "@/routes/index";
 import { getDbSource } from "@/lib/get-db-source";
 import { copyDefaults, type CopyKey } from "@/lib/site-copy";
 import { defaultSiteContent, refreshSiteContent } from "@/lib/site-content";
-import { itemFields, maxItems, sectionsCollectionKeys, type SectionsCollectionKey, type SiteContent } from "@/lib/site-content-schema";
+import { isSectionsCollectionKey, itemFields, maxItems, type SectionsCollectionKey, type SiteContent } from "@/lib/site-content-schema";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -15,6 +16,121 @@ export const Route = createFileRoute("/admin")({
 type Version = { id: string; label: string; createdAt: string };
 type Draft = Record<string, string>;
 type Editing = { collection: SectionsCollectionKey; index: number; isNew: boolean; draft: Draft };
+type ScalarField = "headline" | "intro" | "font" | "accent";
+type Drawer = { kind: "section"; id: string } | { kind: "style" } | { kind: "versions" } | { kind: "mcp" } | null;
+
+/**
+ * Click-to-edit map: every homepage section in the preview below carries a
+ * matching `data-admin-section` attribute (see src/routes/index.tsx and the
+ * Hero component). Collection items carry `data-admin-collection` +
+ * `data-admin-index`. Clicking the preview opens the editor for that exact
+ * part — no separate form pages.
+ *
+ * LOCKED (never editable, by construction — no editor exists for them):
+ * - the footer credit "Januth made this" (rendered by the shared Footer)
+ * - contact facts in code (phone numbers, street address, map pin)
+ * - fixed design assets (hero/beach/about photos, marquee words, buttons)
+ */
+type SectionConfig = {
+  id: string;
+  title: string;
+  hint: string;
+  texts: { key: CopyKey; label: string; multiline?: boolean }[];
+  scalars?: { field: ScalarField; label: string }[];
+  collections?: SectionsCollectionKey[];
+  logo?: boolean;
+};
+
+const SECTIONS: SectionConfig[] = [
+  {
+    id: "hero",
+    title: "Hero",
+    hint: "Top of the homepage. Click Save and it goes live instantly.",
+    texts: [{ key: "home.hero.kicker", label: "Eyebrow kicker" }],
+    scalars: [
+      { field: "headline", label: "Main heading" },
+      { field: "intro", label: "Welcome message" },
+    ],
+    logo: true,
+  },
+  {
+    id: "about",
+    title: "01 · The house of iron",
+    hint: "Introduction two-column block.",
+    texts: [
+      { key: "home.about.title", label: "Section title" },
+      { key: "home.about.body", label: "Body copy", multiline: true },
+    ],
+  },
+  {
+    id: "programs",
+    title: "02 · How we train",
+    hint: "Section title plus the program cards. Click a card to edit it directly.",
+    texts: [{ key: "home.programs.title", label: "Section title" }],
+    collections: ["programs"],
+  },
+  {
+    id: "beach",
+    title: "Beach interlude",
+    hint: "Dark inverted band about the coast.",
+    texts: [
+      { key: "home.beach.title", label: "Title" },
+      { key: "home.beach.body", label: "Body copy", multiline: true },
+    ],
+  },
+  {
+    id: "community",
+    title: "03 · The community",
+    hint: "Stat ledger. Numbers and their labels are all editable.",
+    texts: [
+      { key: "home.community.likes", label: "First number" },
+      { key: "home.community.likesLabel", label: "First label" },
+      { key: "home.community.checkins", label: "Second number" },
+      { key: "home.community.checkinsLabel", label: "Second label" },
+      { key: "home.community.recommend", label: "Third number" },
+      { key: "home.community.recommendLabel", label: "Third label" },
+    ],
+  },
+  {
+    id: "events",
+    title: "04 · From the journal",
+    hint: "Homepage journal rows, fed by the events collection.",
+    texts: [
+      { key: "home.events.title", label: "Section title" },
+      { key: "home.events.aside", label: "Link label" },
+    ],
+    collections: ["events"],
+  },
+  {
+    id: "quotes",
+    title: "Member stories",
+    hint: "Quotes grid. Click a quote to edit it directly.",
+    texts: [{ key: "home.quotes.title", label: "Section title" }],
+    collections: ["quotes"],
+  },
+  {
+    id: "gallery",
+    title: "06 · On the floor",
+    hint: "Photo teaser plus the full gallery collection.",
+    texts: [
+      { key: "home.gallery.title", label: "Section title" },
+      { key: "home.gallery.aside", label: "Link label" },
+    ],
+    collections: ["gallery"],
+  },
+  {
+    id: "visit",
+    title: "Walk in",
+    hint: "Bottom call-to-action band.",
+    texts: [
+      { key: "home.visit.title", label: "Eyebrow" },
+      { key: "home.visit.address", label: "Address heading" },
+      { key: "home.visit.body", label: "Body copy", multiline: true },
+      { key: "home.visit.whatsapp", label: "WhatsApp button" },
+      { key: "home.visit.map", label: "Map button" },
+    ],
+  },
+];
 
 /** Backend-specific wording: never claim Neon when the preview fallback is active. */
 const storageLabels = {
@@ -64,7 +180,9 @@ function AdminPage() {
   const [versions, setVersions] = useState<Version[]>([]);
   const [notice, setNotice] = useState("");
   const [storage, setStorage] = useState<keyof typeof storageLabels>("pglite");
-  const [sectionsDraft, setSectionsDraft] = useState<Record<string, string>>({});
+  const [drawer, setDrawer] = useState<Drawer>(null);
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [scalarDraft, setScalarDraft] = useState({ headline: "", intro: "", font: "", accent: "" });
   const [editing, setEditing] = useState<Editing | null>(null);
   const [uploading, setUploading] = useState("");
 
@@ -73,11 +191,6 @@ function AdminPage() {
   function applyContent(next: SiteContent, etag?: string) {
     setContent(next);
     if (etag) setRevision(etag);
-    setSectionsDraft(() => {
-      const draft: Record<string, string> = {};
-      for (const key of Object.keys(copyDefaults) as CopyKey[]) draft[key] = next.sections[key] ?? copyDefaults[key];
-      return draft;
-    });
   }
 
   async function load() {
@@ -92,6 +205,8 @@ function AdminPage() {
     applyContent(page.data, page.etag);
     setVersions(versionList.data);
     setStorage(nextStorage);
+    // Sync the preview below (it reads the shared content snapshot).
+    await refreshSiteContent();
   }
 
   useEffect(() => {
@@ -119,28 +234,72 @@ function AdminPage() {
     }
   }
 
-  async function save() {
+  function openSection(id: string) {
+    const section = SECTIONS.find((s) => s.id === id);
+    if (!section) return;
+    const nextDraft: Record<string, string> = {};
+    for (const field of section.texts) nextDraft[field.key] = effectiveCopy(field.key);
+    setDraft(nextDraft);
+    setScalarDraft({ headline: content.headline, intro: content.intro, font: content.font, accent: content.accent });
+    setDrawer({ kind: "section", id });
+  }
+
+  function openStyle() {
+    setScalarDraft({ headline: content.headline, intro: content.intro, font: content.font, accent: content.accent });
+    setDrawer({ kind: "style" });
+  }
+
+  async function saveSection(section: SectionConfig) {
     const changedSections: Record<string, string> = {};
-    for (const key of Object.keys(copyDefaults) as CopyKey[]) {
-      if (sectionsDraft[key] !== effectiveCopy(key)) changedSections[key] = sectionsDraft[key];
+    for (const field of section.texts) {
+      if (draft[field.key] !== effectiveCopy(field.key)) changedSections[field.key] = draft[field.key] ?? "";
     }
-    const patch: Record<string, unknown> = {
-      headline: content.headline,
-      intro: content.intro,
-      font: content.font,
-      accent: content.accent,
-    };
-    if (Object.keys(changedSections).length) patch.sections = changedSections;
+    const scalarPatch: Record<string, string> = {};
+    for (const { field } of section.scalars ?? []) {
+      if (scalarDraft[field] !== content[field]) scalarPatch[field] = scalarDraft[field];
+    }
+    if (!Object.keys(changedSections).length && !Object.keys(scalarPatch).length) {
+      setNotice("No changes to save.");
+      return;
+    }
     try {
       const saved = await json<SiteContent>("/api/admin/content", {
         method: "POST",
         headers: { "if-match": revision },
         // Never send collections back from this form; item edits use /api/admin/item.
-        body: JSON.stringify(patch),
+        body: JSON.stringify({
+          headline: scalarPatch.headline ?? content.headline,
+          intro: scalarPatch.intro ?? content.intro,
+          font: scalarPatch.font ?? content.font,
+          accent: scalarPatch.accent ?? content.accent,
+          ...(Object.keys(changedSections).length ? { sections: changedSections } : {}),
+        }),
       });
       applyContent(saved.data, saved.etag);
       await refreshSiteContent();
       setNotice(storageLabels[storage].saved);
+      setDrawer(null);
+    } catch (error) {
+      handleError(error, "Could not save.");
+    }
+  }
+
+  async function saveStyle() {
+    try {
+      const saved = await json<SiteContent>("/api/admin/content", {
+        method: "POST",
+        headers: { "if-match": revision },
+        body: JSON.stringify({
+          headline: scalarDraft.headline || content.headline,
+          intro: scalarDraft.intro || content.intro,
+          font: scalarDraft.font || content.font,
+          accent: scalarDraft.accent || content.accent,
+        }),
+      });
+      applyContent(saved.data, saved.etag);
+      await refreshSiteContent();
+      setNotice(storageLabels[storage].saved);
+      setDrawer(null);
     } catch (error) {
       handleError(error, "Could not save.");
     }
@@ -187,7 +346,6 @@ function AdminPage() {
       });
       if (!response.ok) throw new Error(await response.text());
       await load();
-      await refreshSiteContent();
       setNotice("Logo uploaded to Vercel Blob.");
     } catch (error) {
       handleError(error, "Could not upload logo.");
@@ -224,11 +382,17 @@ function AdminPage() {
     }
   }
 
+  function openItemEditor(collection: SectionsCollectionKey, index: number) {
+    const row = (content[collection] as unknown as Draft[])[index];
+    if (!row) return;
+    setEditing({ collection, index, isNew: false, draft: { ...row, type: row.type || "photo" } });
+  }
+
   async function saveItem() {
     if (!editing) return;
-    const draft = { ...editing.draft };
+    const draftItem = { ...editing.draft };
     // Optional fields must be omitted, not empty, when left blank.
-    for (const key of Object.keys(draft)) if (draft[key] === "" && (key === "poster" || key === "type")) delete draft[key];
+    for (const key of Object.keys(draftItem)) if (draftItem[key] === "" && (key === "poster" || key === "type")) delete draftItem[key];
     try {
       const saved = await json<{ content: SiteContent; revision: string }>("/api/admin/item", {
         method: "POST",
@@ -236,7 +400,7 @@ function AdminPage() {
           collection: editing.collection,
           action: editing.isNew ? "add" : "patch",
           index: editing.index,
-          [editing.isNew ? "item" : "patch"]: draft,
+          [editing.isNew ? "item" : "patch"]: draftItem,
           expectedRevision: revision,
         }),
       });
@@ -262,6 +426,26 @@ function AdminPage() {
       await refreshSiteContent();
     } catch (error) {
       handleError(error, "Could not remove the item.");
+    }
+  }
+
+  /** Preview clicks never navigate: anchors are disabled, clicks open editors. */
+  function handlePreviewClick(e: MouseEvent<HTMLDivElement>) {
+    const target = e.target as HTMLElement | null;
+    const closest = target?.closest?.bind(target);
+    if (!closest) return;
+    if (closest("a")) e.preventDefault();
+    const item = closest("[data-admin-collection]");
+    if (item) {
+      const collection = item.getAttribute("data-admin-collection") ?? "";
+      const index = Number(item.getAttribute("data-admin-index"));
+      if (isSectionsCollectionKey(collection) && Number.isInteger(index)) openItemEditor(collection, index);
+      return;
+    }
+    const section = closest("[data-admin-section]");
+    if (section) {
+      const id = section.getAttribute("data-admin-section") ?? "";
+      if (SECTIONS.some((s) => s.id === id)) openSection(id);
     }
   }
 
@@ -293,68 +477,162 @@ function AdminPage() {
     );
   }
 
-  const sectionGroups = (Object.keys(copyDefaults) as CopyKey[]).reduce<Record<string, CopyKey[]>>(
-    (groups, key) => {
-      (groups[key.split(".")[0] ?? key] ??= []).push(key);
-      return groups;
-    },
-    {},
-  );
+  const activeSection = drawer?.kind === "section" ? SECTIONS.find((s) => s.id === drawer.id) : undefined;
 
   return (
-    <main className="min-h-screen bg-bg px-5 pb-20 pt-28 md:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-wrap items-end justify-between gap-5">
-          <div>
+    <main className="min-h-screen bg-bg pb-20 pt-28 md:pt-32">
+      <style>{`
+        .admin-preview [data-admin-section] { cursor: pointer; border-radius: 2px; }
+        .admin-preview [data-admin-section]:hover { outline: 2px dashed var(--color-iron); outline-offset: 6px; }
+        .admin-preview [data-admin-collection] { cursor: pointer; }
+        .admin-preview [data-admin-collection]:hover { outline: 2px dashed var(--color-iron); outline-offset: 4px; }
+      `}</style>
+
+      {/* Sticky control bar */}
+      <div className="sticky top-16 z-40 border-y border-line bg-bg/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-3 px-5 py-4 md:px-8">
+          <div className="mr-auto">
             <p className="text-xs uppercase tracking-[0.2em] text-iron">SMV GYM admin</p>
-            <h1 className="mt-2 font-display text-5xl uppercase">Website control</h1>
-            <p className="mt-3 max-w-2xl text-muted">
-              Click any text to edit it. Add, change or remove programs, events, quotes, photos and
-              videos — every save updates the live website.
-            </p>
+            <h1 className="font-display text-2xl uppercase leading-none md:text-3xl">Website control</h1>
           </div>
-          <Link to="/" className="flex items-center gap-2 text-sm text-muted no-underline">
-            <Eye className="size-4" />
-            View website
+          <span className="hidden text-xs text-muted sm:inline">{storage === "neon" ? "Neon database" : "Preview storage"}</span>
+          <button onClick={openStyle} className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.14em] hover:text-iron">
+            Style
+          </button>
+          <button onClick={() => setDrawer({ kind: "versions" })} className="flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.14em] hover:text-iron">
+            <History className="size-3.5" /> Versions
+          </button>
+          <button onClick={() => setDrawer({ kind: "mcp" })} className="flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.14em] hover:text-iron">
+            <Server className="size-3.5" /> MCP
+          </button>
+          <Link to="/" className="flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted no-underline hover:text-fg">
+            <Eye className="size-3.5" /> View website
           </Link>
         </div>
-        {notice && (
-          <p className="mt-6 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-fg">{notice}</p>
-        )}
+        <div className="border-t border-line">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1 px-5 py-2 text-xs text-muted md:px-8">
+            <span className="flex items-center gap-1.5">
+              <Pencil className="size-3.5 text-iron" />
+              Click any part of the site below to edit it — preview links are disabled.
+            </span>
+            {notice && <span className="text-fg">{notice}</span>}
+          </div>
+        </div>
+      </div>
 
-        <div className="mt-8 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="space-y-5">
-            {/* Style, headline and intro */}
-            <section className="rounded-lg border border-line bg-surface p-6">
-              <h2 className="font-display text-2xl uppercase">Style and welcome</h2>
-              <label className="mt-6 flex cursor-pointer justify-between rounded-lg border border-dashed border-line p-4 text-sm text-muted">
-                <span>Upload logo to Vercel Blob</span>
-                <input type="file" accept="image/*" onChange={uploadLogo} className="sr-only" />
-              </label>
-              <label className="mt-6 block text-sm text-muted">
-                Main heading
-                <input
-                  value={content.headline}
-                  onChange={(e) => setContent({ ...content, headline: e.target.value })}
-                  className="mt-2 w-full rounded-lg border border-line bg-bg px-4 py-3 text-fg"
-                />
-              </label>
-              <label className="mt-5 block text-sm text-muted">
-                Welcome message
-                <textarea
-                  value={content.intro}
-                  onChange={(e) => setContent({ ...content, intro: e.target.value })}
-                  rows={3}
-                  className="mt-2 w-full rounded-lg border border-line bg-bg px-4 py-3 text-fg"
-                />
-              </label>
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                <label className="text-sm text-muted">
+      {/* Live site preview — the real homepage, click any block to edit */}
+      <div className="admin-preview" onClickCapture={handlePreviewClick}>
+        <Home />
+      </div>
+      <p className="mx-auto max-w-6xl px-5 pt-6 text-xs text-muted md:px-8">
+        Footer credit “Januth made this” is permanently locked and cannot be edited.
+      </p>
+
+      {/* Editor drawer */}
+      {drawer && (
+        <>
+          <div className="fixed inset-0 z-[65] bg-black/50" onClick={() => setDrawer(null)} aria-hidden="true" />
+          <aside className="fixed right-0 top-0 z-[70] h-full w-full max-w-md overflow-y-auto border-l border-line bg-bg p-6" aria-label="Editor">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-iron">Editing</p>
+                <h2 className="mt-1 font-display text-3xl uppercase">
+                  {drawer.kind === "section" ? activeSection?.title : drawer.kind === "style" ? "Style" : drawer.kind === "versions" ? "Latest versions" : "MCP connection"}
+                </h2>
+                {drawer.kind === "section" && <p className="mt-2 text-sm text-muted">{activeSection?.hint}</p>}
+              </div>
+              <button onClick={() => setDrawer(null)} aria-label="Close editor" className="rounded-full border border-line p-2 text-muted hover:text-fg">
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {drawer.kind === "section" && activeSection && (
+              <div className="mt-6 space-y-5">
+                {(activeSection.scalars ?? []).map(({ field, label }) => (
+                  <label key={field} className="block text-sm text-muted">
+                    {label}
+                    {field === "headline" || field === "intro" ? (
+                      <textarea
+                        value={scalarDraft[field]}
+                        onChange={(e) => setScalarDraft({ ...scalarDraft, [field]: e.target.value })}
+                        rows={field === "intro" ? 3 : 2}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      />
+                    ) : null}
+                  </label>
+                ))}
+                {activeSection.texts.map((field) => (
+                  <label key={field.key} className="block text-sm text-muted">
+                    {field.label}
+                    {field.multiline ? (
+                      <textarea
+                        value={draft[field.key] ?? ""}
+                        onChange={(e) => setDraft({ ...draft, [field.key]: e.target.value })}
+                        rows={3}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      />
+                    ) : (
+                      <input
+                        value={draft[field.key] ?? ""}
+                        onChange={(e) => setDraft({ ...draft, [field.key]: e.target.value })}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      />
+                    )}
+                  </label>
+                ))}
+                {activeSection.logo && (
+                  <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-line p-4 text-sm text-muted">
+                    <span>Replace logo (Vercel Blob)</span>
+                    <input type="file" accept="image/*" onChange={uploadLogo} className="sr-only" />
+                  </label>
+                )}
+                {(activeSection.collections ?? []).map((collection) => (
+                  <div key={collection} className="rounded-lg border border-line p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{collectionTitles[collection]}</p>
+                      <span className="text-xs text-muted">{content[collection].length} of {maxItems[collection]}</span>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {(content[collection] as unknown as Draft[]).map((item, index) => (
+                        <div key={index} className="flex items-center gap-2 rounded bg-surface p-2">
+                          <button
+                            onClick={() => openItemEditor(collection, index)}
+                            className="min-w-0 flex-1 truncate text-left text-sm font-semibold hover:text-iron"
+                          >
+                            {item.type === "video" ? "▶ " : ""}{itemLabel(item)}
+                          </button>
+                          <button onClick={() => void removeItem(collection, index)} aria-label={`Remove ${itemLabel(item)}`} className="shrink-0 p-1 text-muted hover:text-fg">
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => setEditing({ collection, index: content[collection].length, isNew: true, draft: blankItem(collection) })}
+                        disabled={content[collection].length >= maxItems[collection]}
+                        className="flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
+                      >
+                        <Plus className="size-4" /> Add item
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => void saveSection(activeSection)}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white"
+                >
+                  <Save className="size-4" /> {storageLabels[storage].save}
+                </button>
+              </div>
+            )}
+
+            {drawer.kind === "style" && (
+              <div className="mt-6 space-y-5">
+                <label className="block text-sm text-muted">
                   Font
                   <select
-                    value={content.font}
-                    onChange={(e) => setContent({ ...content, font: e.target.value })}
-                    className="mt-2 w-full rounded-lg border border-line bg-bg px-4 py-3 text-fg"
+                    value={scalarDraft.font || content.font}
+                    onChange={(e) => setScalarDraft({ ...scalarDraft, font: e.target.value })}
+                    className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
                   >
                     <option>Manrope</option>
                     <option>Arial</option>
@@ -362,211 +640,44 @@ function AdminPage() {
                     <option>Trebuchet MS</option>
                   </select>
                 </label>
-                <label className="text-sm text-muted">
+                <label className="block text-sm text-muted">
                   Accent colour
                   <input
                     type="color"
-                    value={content.accent}
-                    onChange={(e) => setContent({ ...content, accent: e.target.value })}
-                    className="mt-2 h-12 w-full rounded-lg border border-line bg-bg p-1"
+                    value={/^#[0-9a-f]{6}$/i.test(scalarDraft.accent) ? scalarDraft.accent : content.accent}
+                    onChange={(e) => setScalarDraft({ ...scalarDraft, accent: e.target.value })}
+                    className="mt-2 h-12 w-full rounded-lg border border-line bg-surface p-1"
                   />
                 </label>
+                <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-line p-4 text-sm text-muted">
+                  <span>Replace logo (Vercel Blob)</span>
+                  <input type="file" accept="image/*" onChange={uploadLogo} className="sr-only" />
+                </label>
+                <button
+                  onClick={() => void saveStyle()}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white"
+                >
+                  <Save className="size-4" /> {storageLabels[storage].save}
+                </button>
               </div>
-              <button
-                onClick={save}
-                className="mt-7 flex items-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white"
-              >
-                <Save className="size-4" />
-                {storageLabels[storage].save}
-              </button>
-            </section>
+            )}
 
-            {/* Section copy editors */}
-            <section className="rounded-lg border border-line bg-surface p-6">
-              <h2 className="font-display text-2xl uppercase">Page text</h2>
-              <p className="mt-2 text-sm text-muted">Every line of page copy, grouped by page.</p>
-              {Object.entries(sectionGroups).map(([group, keys]) => (
-                <div key={group} className="mt-6">
-                  <p className="text-xs uppercase tracking-[0.2em] text-iron">{group}</p>
-                  <div className="mt-3 space-y-4">
-                    {keys.map((key) => (
-                      <label key={key} className="block text-sm text-muted">
-                        {key}
-                        {copyDefaults[key].length > 70 ? (
-                          <textarea
-                            value={sectionsDraft[key] ?? ""}
-                            onChange={(e) => setSectionsDraft({ ...sectionsDraft, [key]: e.target.value })}
-                            rows={2}
-                            className="mt-2 w-full rounded-lg border border-line bg-bg px-4 py-3 text-fg"
-                          />
-                        ) : (
-                          <input
-                            value={sectionsDraft[key] ?? ""}
-                            onChange={(e) => setSectionsDraft({ ...sectionsDraft, [key]: e.target.value })}
-                            className="mt-2 w-full rounded-lg border border-line bg-bg px-4 py-3 text-fg"
-                          />
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={save}
-                className="mt-7 flex items-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white"
-              >
-                <Save className="size-4" />
-                {storageLabels[storage].save}
-              </button>
-            </section>
-
-            {/* Collection editors */}
-            {sectionsCollectionKeys.map((collection) => (
-              <section key={collection} className="rounded-lg border border-line bg-surface p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="font-display text-2xl uppercase">{collectionTitles[collection]}</h2>
-                  <span className="text-xs text-muted">
-                    {content[collection].length} of {maxItems[collection]}
-                  </span>
-                </div>
-                <div className="mt-5 space-y-3">
-                  {content[collection].map((item, index) => {
-                    const row = item as unknown as Draft;
-                    const isEditing = editing?.collection === collection && editing.index === index && !editing.isNew;
-                    return isEditing ? null : (
-                      <div key={index} className="rounded-lg bg-bg p-3">
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="min-w-0 flex-1 truncate text-sm font-semibold">
-                            {row.type === "video" ? "▶ " : ""}
-                            {itemLabel(row)}
-                          </p>
-                          <div className="flex shrink-0 items-center gap-3">
-                            <button
-                              onClick={() => setEditing({ collection, index, isNew: false, draft: { ...row, type: row.type || "photo" } })}
-                              className="text-xs text-iron"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => void removeItem(collection, index)}
-                              className="text-xs text-muted"
-                              aria-label={`Remove ${itemLabel(row)}`}
-                            >
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        {row.image || row.src ? (
-                          <p className="mt-1 truncate text-xs text-muted">{row.image || row.src}</p>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                  {editing?.collection === collection && editing.isNew ? null : (
-                    <button
-                      onClick={() => setEditing({ collection, index: content[collection].length, isNew: true, draft: blankItem(collection) })}
-                      disabled={content[collection].length >= maxItems[collection]}
-                      className="flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm disabled:opacity-40"
-                    >
-                      <Plus className="size-4" />
-                      Add item
-                    </button>
-                  )}
-                </div>
-                {editing?.collection === collection && (
-                  <div className="mt-5 rounded-lg border border-iron/40 bg-bg p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold">
-                        {editing.isNew ? "New item" : `Editing: ${itemLabel(editing.draft)}`}
-                      </p>
-                      <button onClick={() => setEditing(null)} aria-label="Cancel edit" className="text-muted">
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                    <div className="mt-4 space-y-4">
-                      {itemFields(collection).map((field) => (
-                        <label key={field} className="block text-sm text-muted">
-                          {fieldLabels[field] ?? field}
-                          {field === "type" ? (
-                            <select
-                              value={editing.draft.type ?? "photo"}
-                              onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, type: e.target.value } })}
-                              className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
-                            >
-                              <option value="photo">Photo</option>
-                              <option value="video">Video</option>
-                            </select>
-                          ) : multilineFields.has(field) ? (
-                            <textarea
-                              value={editing.draft[field] ?? ""}
-                              onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, [field]: e.target.value } })}
-                              rows={3}
-                              className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
-                            />
-                          ) : (
-                            <input
-                              value={editing.draft[field] ?? ""}
-                              onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, [field]: e.target.value } })}
-                              className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
-                            />
-                          )}
-                          {photoFields.has(field) && editing.draft[field] ? (
-                            <img
-                              src={editing.draft[field]}
-                              alt=""
-                              className="mt-2 h-20 w-20 rounded object-cover"
-                            />
-                          ) : null}
-                          {field === "type" && editing.draft.type === "video" && editing.draft.src ? (
-                            <video src={editing.draft.src} className="mt-2 h-20 rounded bg-black" muted />
-                          ) : null}
-                          {photoFields.has(field) ? (
-                            <span className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-4 py-3 text-xs">
-                              <ImagePlus className="size-4" />
-                              Upload {field === "poster" ? "poster image" : field === "src" ? "photo or video" : "image"}
-                              <input
-                                type="file"
-                                accept={field === "src" ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*"}
-                                onChange={(e) => void handleMediaPick(e, field as "src" | "image" | "poster")}
-                                className="sr-only"
-                              />
-                            </span>
-                          ) : null}
-                        </label>
-                      ))}
-                    </div>
-                    {uploading && <p className="mt-3 text-sm text-muted">{uploading}</p>}
-                    <button
-                      onClick={() => void saveItem()}
-                      disabled={Boolean(uploading)}
-                      className="mt-5 flex items-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white disabled:opacity-40"
-                    >
-                      <Save className="size-4" />
-                      {editing.isNew ? "Add to website" : "Save item"}
-                    </button>
-                  </div>
-                )}
-              </section>
-            ))}
-          </div>
-
-          <aside className="space-y-5">
-            <div className="rounded-lg border border-line bg-surface p-6">
-              <div className="flex items-center gap-3">
-                <History className="size-5 text-iron" />
-                <h2 className="font-display text-2xl uppercase">Latest versions</h2>
-              </div>
-              <div className="mt-5 space-y-3">
+            {drawer.kind === "versions" && (
+              <div className="mt-6 space-y-3">
+                <button
+                  onClick={() => void version()}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-line px-5 py-3 text-sm font-semibold"
+                >
+                  Create version snapshot
+                </button>
                 {versions.length ? (
                   versions.map((item, index) => (
-                    <div key={item.id} className="rounded-lg bg-bg p-3">
+                    <div key={item.id} className="rounded-lg bg-surface p-3">
                       <p className="flex items-center gap-2 text-sm font-semibold">
                         {index === 0 && <Check className="size-4 text-emerald-400" />}
                         {item.label}
                       </p>
-                      <p className="mt-1 text-xs text-muted">
-                        {new Date(item.createdAt).toLocaleString("en-LK")}
-                      </p>
+                      <p className="mt-1 text-xs text-muted">{new Date(item.createdAt).toLocaleString("en-LK")}</p>
                       <button onClick={() => void restore(item)} className="mt-2 text-xs text-iron">
                         Restore this version
                       </button>
@@ -576,33 +687,118 @@ function AdminPage() {
                   <p className="text-sm text-muted">No versions yet.</p>
                 )}
               </div>
-            </div>
-            <div className="rounded-lg border border-line bg-surface p-6">
-              <div className="flex items-center gap-3">
-                <Server className="size-5 text-iron" />
-                <h2 className="font-display text-2xl uppercase">MCP connection</h2>
+            )}
+
+            {drawer.kind === "mcp" && (
+              <div className="mt-6 space-y-4 text-sm text-muted">
+                <p>
+                  Use your domain URL with an MCP client. Configure HTTP Basic credentials in the
+                  connector using the same admin password as here. An automatic password dialog is
+                  not guaranteed; clients that cannot send Basic credentials cannot connect.
+                </p>
+                <code className="block overflow-x-auto rounded bg-surface p-3 text-xs text-fg">
+                  https://your-domain.com/api/mcp
+                </code>
+                <p className="flex gap-2 text-xs">
+                  <KeyRound className="size-3 shrink-0" />
+                  HTTP Basic authentication. Any username is accepted; use your admin password.
+                </p>
+                <p className="flex gap-2 text-xs">
+                  <Sparkles className="size-3 shrink-0" />
+                  Tools: discover the site, read and edit any section or gallery item, upload
+                  images, and manage versions.
+                </p>
               </div>
-              <p className="mt-3 text-sm text-muted">
-                Use your domain URL with an MCP client. Configure HTTP Basic credentials in the
-                connector using the same admin password as here. An automatic password dialog is
-                not guaranteed; clients that cannot send Basic credentials cannot connect.
-              </p>
-              <code className="mt-4 block overflow-x-auto rounded bg-bg p-3 text-xs text-fg">
-                https://your-domain.com/api/mcp
-              </code>
-              <p className="mt-3 flex gap-2 text-xs text-muted">
-                <KeyRound className="size-3 shrink-0" />
-                HTTP Basic authentication. Any username is accepted; use your admin password.
-              </p>
-              <p className="mt-3 flex gap-2 text-xs text-muted">
-                <Sparkles className="size-3 shrink-0" />
-                Tools: discover the site, read and edit any section or gallery item, upload
-                images, and manage versions.
-              </p>
-            </div>
+            )}
           </aside>
-        </div>
-      </div>
+        </>
+      )}
+
+      {/* Collection item editor */}
+      {editing && (
+        <>
+          <div className="fixed inset-0 z-[75] bg-black/50" onClick={() => setEditing(null)} aria-hidden="true" />
+          <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+            <div className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-lg border border-line bg-bg p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">
+                  {editing.isNew ? `New ${collectionTitles[editing.collection]}` : `Editing: ${itemLabel(editing.draft)}`}
+                </p>
+                <button onClick={() => setEditing(null)} aria-label="Cancel edit" className="text-muted hover:text-fg">
+                  <X className="size-4" />
+                </button>
+              </div>
+              <div className="mt-4 space-y-4">
+                {itemFields(editing.collection).map((field) => (
+                  <label key={field} className="block text-sm text-muted">
+                    {fieldLabels[field] ?? field}
+                    {field === "type" ? (
+                      <select
+                        value={editing.draft.type ?? "photo"}
+                        onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, type: e.target.value } })}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      >
+                        <option value="photo">Photo</option>
+                        <option value="video">Video</option>
+                      </select>
+                    ) : multilineFields.has(field) ? (
+                      <textarea
+                        value={editing.draft[field] ?? ""}
+                        onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, [field]: e.target.value } })}
+                        rows={3}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      />
+                    ) : (
+                      <input
+                        value={editing.draft[field] ?? ""}
+                        onChange={(e) => setEditing({ ...editing, draft: { ...editing.draft, [field]: e.target.value } })}
+                        className="mt-2 w-full rounded-lg border border-line bg-surface px-4 py-3 text-fg"
+                      />
+                    )}
+                    {photoFields.has(field) && editing.draft[field] ? (
+                      <img src={editing.draft[field]} alt="" className="mt-2 h-20 w-20 rounded object-cover" />
+                    ) : null}
+                    {field === "type" && editing.draft.type === "video" && editing.draft.src ? (
+                      <video src={editing.draft.src} className="mt-2 h-20 rounded bg-black" muted />
+                    ) : null}
+                    {photoFields.has(field) ? (
+                      <span className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-line px-4 py-3 text-xs">
+                        <ImagePlus className="size-4" />
+                        Upload {field === "poster" ? "poster image" : field === "src" ? "photo or video" : "image"}
+                        <input
+                          type="file"
+                          accept={field === "src" ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*"}
+                          onChange={(e) => void handleMediaPick(e, field as "src" | "image" | "poster")}
+                          className="sr-only"
+                        />
+                      </span>
+                    ) : null}
+                  </label>
+                ))}
+              </div>
+              {uploading && <p className="mt-3 text-sm text-muted">{uploading}</p>}
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  onClick={() => void saveItem()}
+                  disabled={Boolean(uploading)}
+                  className="flex items-center gap-2 rounded-lg bg-iron px-5 py-3 font-semibold text-white disabled:opacity-40"
+                >
+                  <Save className="size-4" />
+                  {editing.isNew ? "Add to website" : "Save item"}
+                </button>
+                {!editing.isNew && (
+                  <button
+                    onClick={() => void removeItem(editing.collection, editing.index)}
+                    className="flex items-center gap-2 rounded-lg border border-line px-5 py-3 text-sm text-muted hover:text-fg"
+                  >
+                    <Trash2 className="size-4" /> Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </main>
   );
 }

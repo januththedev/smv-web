@@ -15,32 +15,32 @@ try {
   await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD_QA ?? "smv-admin-qa-9182");
   await page.click('button:has-text("Open admin")');
   await page.waitForSelector('text=Website control', { timeout: 15000 });
-  await page.screenshot({ path: "screenshots/admin-top.png" });
 
-  // Section editors rendered?
-  const pageTextCount = await page.locator('input[value*="The house of iron"]').count();
-  console.log("home.about.title editor present:", pageTextCount > 0);
+  // Live site preview rendered inside admin?
+  console.log("preview hero:", await page.locator('.admin-preview [data-admin-section="hero"]').count());
+  console.log("preview sections:", await page.locator(".admin-preview [data-admin-section]").count());
 
-  // Gallery card + item rows
-  const galleryCard = page.locator('section', { hasText: 'Gallery (photos & videos)' }).first();
-  console.log("gallery card:", await galleryCard.count());
-  console.log("gallery Edit buttons:", await galleryCard.locator('button:has-text("Edit")').count());
+  // Click the about section -> section drawer opens
+  await page.locator('.admin-preview [data-admin-section="about"]').click();
+  await page.waitForSelector('text=01 · The house of iron');
+  const aboutValue = await page.locator('aside input').first().inputValue();
+  console.log("about title field:", aboutValue.slice(0, 40));
+  await page.screenshot({ path: "screenshots/admin-section-drawer.png" });
+  await page.click('button[aria-label="Close editor"]');
 
-  // Open the first gallery item editor
-  await galleryCard.locator('button:has-text("Edit")').first().click();
+  // Click a program card -> item editor opens
+  await page.locator('.admin-preview [data-admin-collection="programs"]').first().click();
   await page.waitForSelector('text=Save item');
-  const srcValue = await page.locator('section:has-text("Gallery (photos & videos)") input').first().inputValue();
-  console.log("first gallery src field:", srcValue.slice(0, 60));
+  console.log("item editor opened");
   await page.screenshot({ path: "screenshots/admin-edit-item.png" });
   await page.click('button[aria-label="Cancel edit"]');
 
-  // Add-item form
-  await galleryCard.locator('button:has-text("Add item")').click();
+  // Programs drawer -> Add item form
+  await page.locator('.admin-preview [data-admin-section="programs"]').click();
+  await page.click('button:has-text("Add item")');
   await page.waitForSelector('text=Add to website');
-  console.log("add form opened with fields:", await galleryCard.locator('select').count(), "select;",
-    await galleryCard.locator('input[type="file"]').count(), "file input");
+  console.log("add form opened");
   await page.screenshot({ path: "screenshots/admin-add-item.png" });
-  await page.click('button[aria-label="Cancel edit"]');
 
   console.log("console errors:", consoleErrors.length ? consoleErrors : "none");
   console.log("ADMIN-QA-OK");

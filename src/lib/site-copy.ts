@@ -18,6 +18,12 @@ export const copyDefaults = {
   "home.beach.title": "No walls on Wadduwa beach.",
   "home.beach.body":
     "Training beyond the gym floor. Simple, hard sessions on Wadduwa beach, with the south coast as the backdrop.",
+  "home.community.likes": "3,360",
+  "home.community.likesLabel": "Likes on Facebook",
+  "home.community.checkins": "2,718",
+  "home.community.checkinsLabel": "Facebook check-ins",
+  "home.community.recommend": "100%",
+  "home.community.recommendLabel": "Would recommend",
   "home.programs.title": "How we train",
   "home.events.title": "From the journal",
   "home.events.aside": "All news",
