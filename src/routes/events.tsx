@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getNews } from "@/lib/get-news";
 import { fallbackNews, type NewsPost } from "@/lib/news";
 import { site, waJoin } from "@/lib/site";
-import { useSiteContent, useSiteCopy } from "@/lib/site-content";
+import { useSiteCopy } from "@/lib/site-content";
 
 export const Route = createFileRoute("/events")({
   loader: async () => {
@@ -44,7 +44,6 @@ function orderLead(posts: NewsPost[]) {
 }
 
 function Events() {
-  const { events } = useSiteContent();
   const copy = useSiteCopy();
   const root = useRef<HTMLDivElement>(null);
   const payload = Route.useLoaderData();
@@ -73,29 +72,6 @@ function Events() {
       />
 
       <div className="mx-auto max-w-6xl px-5 pb-24 md:px-8">
-        {/* Managed announcements are independent of the Facebook/news loader. */}
-        <section aria-labelledby="managed-events-heading" className="mb-16 md:mb-24">
-          <h2 id="managed-events-heading" className="font-display text-3xl font-semibold uppercase tracking-tight md:text-4xl">
-            {copy("events.managed.title")}
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">{copy("events.managed.body")}</p>
-          <div className="mt-8 divide-y divide-line border-y border-line">
-            {events.map((event, index) => (
-              <article key={`${event.slug}-${index}`} className="grid gap-5 py-7 md:grid-cols-12 md:gap-8">
-                <img src={event.image} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover md:col-span-3" />
-                <div className="md:col-span-9">
-                  <p className="text-xs uppercase tracking-[0.2em] text-iron">
-                    {[event.kicker, event.when].filter(Boolean).join(" · ")}
-                  </p>
-                  <h3 className="mt-2 font-display text-3xl font-semibold uppercase tracking-tight md:text-4xl">{event.title}</h3>
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">{event.copy}</p>
-                </div>
-              </article>
-            ))}
-            {!events.length && <p className="py-7 text-sm text-muted">No gym updates at the moment.</p>}
-          </div>
-        </section>
-
         {/* Provenance note — hedged, no implied live feed or strict chronology. */}
         <div
           data-reveal
@@ -112,15 +88,8 @@ function Events() {
         {lead ? <LeadStory post={lead} /> : null}
 
         {rest.length ? (
-          <section aria-labelledby="journal-heading" className="mt-16 md:mt-24">
+          <section aria-label="More from the page" className="mt-16 md:mt-24">
             <div className="flex items-baseline justify-between gap-4">
-              <h2
-                id="journal-heading"
-                data-reveal
-                className="font-display text-2xl font-semibold uppercase tracking-tight text-fg md:text-3xl"
-              >
-                The journal
-              </h2>
               <p data-reveal className="text-[0.6875rem] uppercase tracking-[0.22em] text-muted">
                 More from the page
               </p>

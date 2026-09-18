@@ -14,10 +14,9 @@ export const site = {
   phoneAltTel: "+94771446003",
   email: "sarangalak@gmail.com",
   whatsapp: "https://wa.me/94712738110",
-  mapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=567%2F2%2F1+Galle+Road+Wadduwa+Sri+Lanka",
+  mapsUrl: "https://maps.google.com/?cid=1919696542040790709",
   mapsEmbed:
-    "https://maps.google.com/maps?q=567%2F2%2F1%20Galle%20Road%20Wadduwa%20Sri%20Lanka&t=&z=16&ie=UTF8&iwloc=&output=embed",
+    "https://maps.google.com/maps?cid=1919696542040790709&z=17&output=embed",
   facebook: "https://www.facebook.com/SarangalakmalFitness",
   facebookEmbed:
     "https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FSarangalakmalFitness&tabs=timeline&width=500&height=720&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true",
