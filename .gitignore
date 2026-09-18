@@ -11,3 +11,9 @@ dist
 .wrangler
 *.local
 routeTree.gen.ts
+
+.vercel
+public/__grok
+.github_repo
+.project_id
+.node_modules.lock

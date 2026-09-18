@@ -11,14 +11,18 @@ type Props = {
   compact?: boolean;
 };
 
+const inputClass =
+  "h-14 min-w-0 w-full rounded-xs border border-line bg-raised px-4 text-base text-fg placeholder:text-muted shadow-border outline-none transition-none focus-visible:outline-2 focus-visible:outline-fg focus-visible:outline-offset-2";
+
 export function JoinForm({ compact }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [sent, setSent] = useState(false);
   const [payload, setPayload] = useState<{
     name: string;
+    phone: string;
     goal: (typeof goals)[number];
     note: string;
-  }>({ name: "", goal: goals[0], note: "" });
+  }>({ name: "", phone: "", goal: goals[0], note: "" });
 
   function capture(form: HTMLFormElement) {
     const fd = new FormData(form);
@@ -42,6 +46,7 @@ export function JoinForm({ compact }: Props) {
     }
     setPayload({
       name: nextName,
+      phone: nextPhone,
       goal: ((goals as readonly string[]).includes(nextGoal)
         ? nextGoal
         : goals[0]) as (typeof goals)[number],
@@ -58,17 +63,18 @@ export function JoinForm({ compact }: Props) {
   }
 
   if (sent) {
-    const message = `Hi SMV GYM — I'm ${payload.name}. Goal: ${payload.goal}. ${payload.note}`.trim();
+    const message = `Hi SMV GYM — I'm ${payload.name}. Goal: ${payload.goal}. My number: ${payload.phone}.${payload.note ? ` ${payload.note}` : ""}`.trim();
     return (
-      <div className="rounded-xl bg-raised p-6 shadow-[0_0_0_1px_rgb(238_234_227_/_10%)]">
-        <p className="font-display text-3xl font-semibold uppercase tracking-tight text-fg">
-          We have your note.
+      <div className="rounded-xs border-t border-line bg-surface p-6 md:p-8" role="status" aria-live="polite">
+        <p className="font-display text-4xl font-semibold uppercase leading-[0.9] tracking-tight text-fg">
+          Your message is ready.
         </p>
         <p className="mt-3 text-muted">
-          Send your details on WhatsApp so we can reply today.
+          Open WhatsApp and send it to the gym. Nothing has been sent yet.
+          The gym receives your details only after you send the message in WhatsApp.
         </p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button asChild>
+        <div className="mt-6 flex flex-col flex-wrap gap-3 sm:flex-row">
+          <Button asChild className="rounded-xs transition-none active:not-disabled:scale-100">
             <a href={waJoin(message)}>Open WhatsApp</a>
           </Button>
           <Button asChild variant="ghost">
@@ -84,9 +90,9 @@ export function JoinForm({ compact }: Props) {
       ref={formRef}
       onSubmit={onSubmit}
       method="dialog"
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-5"
     >
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="join-name">Name</Label>
           <Input
@@ -94,6 +100,7 @@ export function JoinForm({ compact }: Props) {
             name="name"
             required
             autoComplete="name"
+            className={inputClass}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -104,6 +111,7 @@ export function JoinForm({ compact }: Props) {
             required
             type="tel"
             autoComplete="tel"
+            className={inputClass}
           />
         </div>
       </div>
@@ -113,7 +121,7 @@ export function JoinForm({ compact }: Props) {
           id="join-goal"
           name="goal"
           defaultValue={goals[0]}
-          className="h-12 rounded-md bg-raised px-3 text-base text-fg shadow-[0_0_0_1px_rgb(238_234_227_/_12%)] outline-none focus-visible:shadow-[0_0_0_1px_var(--color-iron)]"
+          className={inputClass}
         >
           {goals.map((g) => (
             <option key={g} value={g}>
@@ -129,14 +137,17 @@ export function JoinForm({ compact }: Props) {
             id="join-note"
             name="note"
             placeholder="Training history, preferred time, competition plans…"
+            className="min-h-32 rounded-xs border border-line bg-raised px-4 py-3 text-base text-fg placeholder:text-muted shadow-border outline-none transition-none focus-visible:outline-2 focus-visible:outline-fg focus-visible:outline-offset-2"
           />
         </div>
       )}
-      <Button type="submit" size="lg" className="mt-2 self-start pr-5">
-        Send on WhatsApp
+      <Button type="submit" size="lg" className="mt-1 h-14 w-full self-start rounded-xs px-4 transition-none active:not-disabled:scale-100 sm:w-auto">
+        Prepare WhatsApp message
       </Button>
-      <p className="text-xs text-subtle">
-        We will explain the membership price when we reply.
+      <p className="max-w-prose text-xs leading-relaxed text-muted">
+        This form prepares a WhatsApp message for you to review and send; it
+        does not send anything to the gym. A copy is saved in this browser when
+        storage is available. Ask the gym for the current membership price.
       </p>
     </form>
   );

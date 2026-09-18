@@ -19,15 +19,16 @@ export function VelocityMarquee() {
     const el = wrap.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (reduce || coarse) return;
 
     let raf = 0;
     const onScroll = (e: Event) => {
       const v = (e as CustomEvent).detail?.velocity ?? 0;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const skew = Math.max(-12, Math.min(12, v * 1.4));
-        const duration = Math.max(10, 28 - Math.abs(v) * 3);
+        const skew = Math.max(-8, Math.min(8, v * 1.1));
+        const duration = Math.max(12, 28 - Math.abs(v) * 3);
         el.style.setProperty("--marquee-skew", `${skew}deg`);
         el.style.setProperty("--marquee-duration", `${duration}s`);
       });
@@ -42,7 +43,7 @@ export function VelocityMarquee() {
   return (
     <div
       ref={wrap}
-      className="relative overflow-hidden border-y border-line bg-surface py-4"
+      className="marquee-wrap relative border-y border-line bg-surface py-4"
       aria-hidden="true"
     >
       <div className="marquee-track gap-10 text-fg">
