@@ -17,3 +17,7 @@ public/__grok
 .github_repo
 .project_id
 .node_modules.lock
+.grok/
+.mimosa/
+.qa/
+screenshots/
