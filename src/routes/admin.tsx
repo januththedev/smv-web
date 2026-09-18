@@ -692,11 +692,12 @@ function AdminPage() {
             {drawer.kind === "mcp" && (
               <div className="mt-6 space-y-4 text-sm text-muted">
                 <p>
-                  Use your domain URL with an MCP client. Send the admin password as an
+                  Use your domain URL with an MCP client. On claude.ai pick
+                  “Sign in now” and approve with the admin password on the gym’s
+                  sign-in page. Other clients send the password as an{" "}
                   <code className="text-fg">Authorization</code> header —{" "}
                   <code className="text-fg">Bearer &lt;password&gt;</code> works, as do HTTP Basic
-                  or the bare password. An automatic password dialog is
-                  not guaranteed; clients that cannot send the header cannot connect.
+                  or the bare password.
                 </p>
                 <code className="block overflow-x-auto rounded bg-surface p-3 text-xs text-fg">
                   https://your-domain.com/api/mcp

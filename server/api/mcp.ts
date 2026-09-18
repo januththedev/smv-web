@@ -9,6 +9,7 @@ import {
 import { copyDefaults, type CopyKey } from "../../src/lib/site-copy";
 import { contentService, revisionOf, revisionSchema, type ContentService, type SiteVersion } from "../../src/lib/site-content.server";
 import { extractAdminSecret, verifyAdminPassword } from "../utils/admin-auth";
+import { verifyAccessToken } from "../utils/oauth";
 import { decodeImageBase64, uploadImage, imageMimeTypes, MAX_BASE64_LENGTH, readBoundedBody } from "../utils/admin-image";
 
 const result = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value) }] });
@@ -98,12 +99,22 @@ function corsHeaders(request: Request): Record<string, string> {
 export async function handleMcpRequest(request: Request, factory: () => McpServer = () => createMcpServer()): Promise<Response> {
   const cors = corsHeaders(request);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  // Accept Basic, Bearer, or the raw pasted secret — Claude's connector dialog
-  // sends the header value literally, so most setups arrive as Bearer or bare.
-  const password = extractAdminSecret(request);
-  if (!password || !verifyAdminPassword(password)) return new Response("Admin password required", {
-    status: 401, headers: { ...cors, "www-authenticate": 'Basic realm="SMV Admin MCP", charset="UTF-8"', "cache-control": "no-store" },
-  });
+  // Two valid credentials: the raw admin password (Basic/Bearer/bare, for
+  // desktop clients and header fields) or an OAuth access token issued by
+  // /api/oauth/token after the admin signed in (claude.ai "Sign in now").
+  const secret = extractAdminSecret(request);
+  const passwordOk = !!secret && verifyAdminPassword(secret);
+  const tokenOk = !passwordOk && !!secret && (await verifyAccessToken(secret));
+  if (!passwordOk && !tokenOk) {
+    let origin = "";
+    try { origin = new URL(request.url).origin; } catch { /* relative URL: no metadata hint */ }
+    const challenges = [`Basic realm="SMV Admin MCP", charset="UTF-8"`];
+    // RFC 9728 hint so OAuth-capable clients discover sign-in instead of guessing.
+    if (origin) challenges.unshift(`Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`);
+    return new Response("Admin password required", {
+      status: 401, headers: { ...cors, "www-authenticate": challenges.join(", "), "cache-control": "no-store" },
+    });
+  }
   if (request.method !== "POST") return new Response("Use stateless MCP POST", { status: 405, headers: { ...cors, allow: "POST" } });
   let parsedBody: unknown;
   try {

@@ -97,7 +97,9 @@ try {
   {
     const { response } = await post(null, { jsonrpc: "2.0", id: 1, method: "initialize", params: {} });
     assert.equal(response.status, 401);
-    assert.match(response.headers.get("www-authenticate") ?? "", /^Basic/);
+    // Both challenges advertised: OAuth discovery for capable clients, Basic for the rest.
+    assert.match(response.headers.get("www-authenticate") ?? "", /resource_metadata="[^"]*oauth-protected-resource"/);
+    assert.match(response.headers.get("www-authenticate") ?? "", /Basic/);
     ok("no auth -> 401 + WWW-Authenticate");
   }
 
@@ -163,7 +165,7 @@ try {
 
     const anon = await direct("POST", {}, JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} }));
     assert.equal(anon.status, 401);
-    assert.match(anon.headers.get("www-authenticate") ?? "", /^Basic/);
+    assert.match(anon.headers.get("www-authenticate") ?? "", /Basic/);
     assert.ok((anon.headers.get("access-control-allow-origin") ?? "").length > 0, "no CORS on 401");
     ok("handler POST anon -> 401 + challenge + CORS");
 

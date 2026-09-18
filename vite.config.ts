@@ -88,6 +88,9 @@ function smvDevApiPlugin(): Plugin {
 function serverApiBridgePlugin(): Plugin {
   const routes: Array<[path: string, moduleId: string, method?: string]> = [
     ["/api/mcp", "/server/api/mcp.ts"],
+    ["/api/oauth/register", "/server/api/oauth/register.post.ts", "POST"],
+    ["/api/oauth/authorize", "/server/api/oauth/authorize.ts"],
+    ["/api/oauth/token", "/server/api/oauth/token.post.ts", "POST"],
     ["/api/admin/content", "/server/api/admin/content.ts"],
     ["/api/admin/upload", "/server/api/admin/upload.post.ts", "POST"],
     ["/api/admin/item", "/server/api/admin/item.post.ts", "POST"],

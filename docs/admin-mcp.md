@@ -20,16 +20,26 @@ MCP clients prompt for Basic credentials on connect, others require you to
 preconfigure headers or cannot send them at all. If the client cannot send
 an `Authorization` header, it cannot connect — there is no fallback.
 
-### Claude (claude.ai custom connector)
+### Claude (claude.ai custom connector — phone friendly, recommended)
+
+The server speaks OAuth, so Claude's **"Sign in now"** flow works with
+nothing to paste:
 
 1. Settings → Connectors → Add custom connector.
 2. URL: `https://smv-web.vercel.app/api/mcp` (or your deployment URL).
-3. Authentication: No sign-in + Request headers → add header
-   `Authorization` with value `Bearer <ADMIN_PASSWORD>`
-   (replace `<ADMIN_PASSWORD>` with the real Vercel env value).
-4. Click Add, then Connect. If Connect fails with an authorization error,
-   re-check the header value — Claude sends it literally, including the
-   `Bearer ` prefix and space.
+3. Authentication: **Sign in now** (auto-detected) + **Register automatically**.
+4. Click Add, then Connect → Claude opens the gym's sign-in page → enter
+   the **admin password** (same `ADMIN_PASSWORD` as Vercel) → Authorize.
+5. Test: *"Use the SMV connector to tell me the current hero headline."*
+
+Claude gets a 7-day token; when it expires, sign in again the same way.
+
+### Other clients (header-based)
+
+Claude Code, Claude Desktop, Cursor, VS Code — URL as above plus header
+`Authorization: Bearer <ADMIN_PASSWORD>` (HTTP Basic or the bare password
+work too). Example:
+`claude mcp add --transport http smv https://smv-web.vercel.app/api/mcp --header "Authorization: Bearer <password>"`
 
 The admin web UI (`/admin`) uses a separate cookie session with the same
 password; MCP always uses Basic auth.

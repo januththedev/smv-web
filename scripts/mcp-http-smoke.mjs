@@ -42,7 +42,7 @@ try {
   });
   await denied.text();
   assert.equal(denied.status, 401);
-  assert.match(denied.headers.get('www-authenticate') ?? '', /^Basic/);
+  assert.match(denied.headers.get('www-authenticate') ?? '', /Basic/);
 
   const post = async (body) => {
     const response = await fetch(`${base}/api/mcp`, {
